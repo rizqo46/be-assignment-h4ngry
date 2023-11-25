@@ -4,6 +4,8 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
+export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
+
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export interface Menus {
@@ -36,8 +38,21 @@ export interface OutletsMenus {
   updated_at: Generated<Timestamp>;
 }
 
+export interface SchemaMigrations {
+  dirty: boolean;
+  version: Int8;
+}
+
+export interface Users {
+  created_at: Generated<Timestamp>;
+  id: Generated<number>;
+  username: string;
+}
+
 export interface DB {
   menus: Menus;
   outlets: Outlets;
   outlets_menus: OutletsMenus;
+  schema_migrations: SchemaMigrations;
+  users: Users;
 }
