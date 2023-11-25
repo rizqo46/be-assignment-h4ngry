@@ -10,11 +10,7 @@ import { ConfigModule } from '@nestjs/config';
         KyselyModule.forRoot({
             dialect: new PostgresDialect({
                 pool: new Pool({
-                    host: process.env.DB_HOST,
-                    user: process.env.DB_USER,
-                    port: process.env.DB_PORT,
-                    password: process.env.DB_PASSWORD,
-                    database: process.env.DB_DATABASE,
+                    connectionString: process.env.DATABASE_URL,
                 }),
             }),
             log: ['query'],
