@@ -3,6 +3,8 @@ import { MenusService } from './menus.service';
 import { PaginationReqDto } from 'src/shared/dto/pagination.dto';
 import { OutletsService } from 'src/outlets/outlets.service';
 import { OutletModel } from 'src/shared/models/outlets.model';
+import { UsePipes, ValidationPipe } from '@nestjs/common';
+
 
 @Controller('menus')
 export class MenusController {
@@ -12,6 +14,7 @@ export class MenusController {
   ) { }
 
   @Get("outlets/:uuid")
+  @UsePipes(new ValidationPipe({ transform: true }))
   async findMenusOnOutlet(
     @Param('uuid', new ParseUUIDPipe()) outletUuid: string,
     @Query() req: PaginationReqDto,
@@ -28,6 +31,8 @@ export class MenusController {
       throw new InternalServerErrorException()
     }
 
-    return outlet
+    let outletMenus = await this.menusService.findOutletMenu(outlet.id, req)
+
+    return this.menusService.parseFindAllResponse(req, outletMenus)
   }
 }
