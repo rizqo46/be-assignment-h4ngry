@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { InjectKysely } from "nestjs-kysely";
-import { DB } from 'src/shared/models/d.db';
-import { Kysely } from 'kysely'
+import { JwtService } from '@nestjs/jwt';
+import { UserModel } from 'src/shared/models/users.model';
+import { LoginRespDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
-    constructor(@InjectKysely() private readonly db: Kysely<DB>) { }
+    constructor(private jwtService: JwtService) { }
+    async signIn(user: Partial<UserModel>): Promise<LoginRespDto> {
+        const payload = { sub: user.id, username: user.username }
+        return new LoginRespDto(await this.jwtService.signAsync(payload))
+    }
 }

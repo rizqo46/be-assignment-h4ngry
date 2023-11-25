@@ -20,5 +20,6 @@ export class AuthController {
             throw new BadRequestException("user not found")
         }
 
+        return this.authService.signIn(user)
     }
 }
