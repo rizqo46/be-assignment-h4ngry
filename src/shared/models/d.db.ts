@@ -28,7 +28,16 @@ export interface Outlets {
   uuid: Generated<string>;
 }
 
+export interface OutletsMenus {
+  created_at: Generated<Timestamp>;
+  is_available: boolean;
+  menu_id: number;
+  outlet_id: number;
+  updated_at: Generated<Timestamp>;
+}
+
 export interface DB {
   menus: Menus;
   outlets: Outlets;
+  outlets_menus: OutletsMenus;
 }
