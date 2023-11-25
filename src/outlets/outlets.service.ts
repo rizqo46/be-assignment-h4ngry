@@ -55,6 +55,6 @@ export class OutletsService {
             selectFrom("outlets").
             where("uuid", "=", uuid).
             select("id").
-            executeTakeFirstOrThrow()
+            executeTakeFirst()
     }
 }

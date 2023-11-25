@@ -2,7 +2,7 @@ import { Controller } from '@nestjs/common';
 import { OutletsService } from './outlets.service';
 import { Get, Query } from '@nestjs/common';
 import { UsePipes, ValidationPipe } from '@nestjs/common';
-import { PaginationReqDto, PaginationRespDto } from 'src/shared/dto/pagination.dto';
+import { PaginationReqDto } from 'src/shared/dto/pagination.dto';
 
 @Controller('outlets')
 export class OutletsController {

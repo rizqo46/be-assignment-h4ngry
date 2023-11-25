@@ -21,15 +21,12 @@ export class MenusController {
   ) {
     let outlet: Partial<OutletModel>
 
-    try {
       outlet = await this.outletsService.findOne(outletUuid)
-    } catch (error) {
-      if (error == "Error: no result") {
+      
+      if (!outlet) {
         throw new NotFoundException("outlet isn't found")
       }
 
-      throw new InternalServerErrorException()
-    }
 
     let outletMenus = await this.menusService.findOutletMenu(outlet.id, req)
 
