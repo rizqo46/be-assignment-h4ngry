@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, HttpCode, HttpStatus, NotAcceptableException, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { LoginDto } from './dto/login.dto';
 import { UsersService } from 'src/users/users.service';
 import { AuthService } from './auth.service';
