@@ -97,10 +97,13 @@ export class CartsController {
   @UseGuards(JWTGuard)
   @Delete(":uuid")
   @UsePipes(new ValidationPipe({ transform: true }))
-  async deleteCart(@Request() req: RequestExpress) {
-    // get cart
-    // delete cart item
-    // delete cart
-    return req[""]
+  async deleteCart(
+    @Request() req: RequestExpress,
+    @Param('uuid', new ParseUUIDPipe()) uuid: string,
+
+  ) {
+    let cart = await this.cartsService.validateCart(uuid, req["user"].sub)
+    await this.cartsService.deleteCart(cart.id)
+    return new SuccessRespDto()
   }
 }

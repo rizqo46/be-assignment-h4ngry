@@ -155,14 +155,14 @@ export class CartsService {
 
     async updateCartItem(data: Partial<CartItemModel>) {
         return await this.db.transaction().execute(async (trx) => {
-            trx.
+            await trx.
                 updateTable("cart_items").
                 set({
                     quantity: data.quantity,
                 }).
                 where("cart_items.uuid", "=", data.uuid).executeTakeFirstOrThrow()
 
-            trx.updateTable("carts").
+            return await trx.updateTable("carts").
                 set({ updated_at: sql<Date>`NOW()` }).
                 where("carts.id", "=", data.cart_id).
                 execute()
@@ -175,5 +175,44 @@ export class CartsService {
             deleteFrom("cart_items").
             where("uuid", "=", itemUuid).
             executeTakeFirst()
+    }
+
+    async getCart(cartUuid: string) {
+        let cart = await this.db.selectFrom("carts")
+            .where("uuid", "=", cartUuid)
+            .select(["id", "user_id"])
+            .executeTakeFirst()
+
+        if (!cart) {
+            throw new NotFoundException("cart is not found")
+        }
+
+        return cart
+    }
+
+
+    async validateCart(cartUuid: string, userId: number) {
+        let cart = await this.getCart(cartUuid)
+
+        if (cart.user_id != userId) {
+            throw new ForbiddenException("cart item is not belong to user")
+        }
+
+        return cart
+    }
+
+    async deleteCart(id: number) {
+        return await this.db.transaction().execute(async (trx) => {
+            //  Delete cart item first, since its depend on cart
+            await trx.deleteFrom("cart_items").
+                where("cart_items.cart_id", "=", id).
+                executeTakeFirstOrThrow()
+
+            // Delete cart
+            return await trx.
+                deleteFrom("carts").
+                where("id", "=", id).
+                executeTakeFirstOrThrow()
+        })
     }
 }
