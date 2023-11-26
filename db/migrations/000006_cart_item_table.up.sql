@@ -16,6 +16,7 @@ CREATE TRIGGER cart_items_moddatetime
 
 -- Add foreign key constraint to "cart_items" table
 ALTER TABLE "cart_items" ADD FOREIGN KEY ("menu_id") REFERENCES "menus" ("id");
+ALTER TABLE "cart_items" ADD FOREIGN KEY ("cart_id") REFERENCES "carts" ("id");
 
 -- Create unique index on "cart_items" table
 CREATE UNIQUE INDEX ON "cart_items" ("cart_id", "menu_id");
