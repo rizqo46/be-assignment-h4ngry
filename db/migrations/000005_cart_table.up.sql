@@ -1,3 +1,4 @@
+BEGIN;
 -- Create "carts" table
 CREATE TABLE "carts" (
     "id" serial4 PRIMARY KEY,
@@ -8,7 +9,7 @@ CREATE TABLE "carts" (
     "updated_at" timestamp NOT NULL DEFAULT (now ())
 );
 
-CREATE EXTENSION moddatetime;
+CREATE EXTENSION IF NOT EXISTS moddatetime;
 
 -- Add updated at auto update trigger
 CREATE TRIGGER carts_moddatetime
@@ -25,3 +26,5 @@ CREATE UNIQUE INDEX ON "carts" ("user_id", "outlet_id");
 
 -- Create index on "updated_at" column of "carts" table
 CREATE INDEX cart_updated_at ON carts(updated_at);
+
+COMMIT;

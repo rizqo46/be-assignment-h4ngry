@@ -13,7 +13,7 @@ CREATE TABLE "orders" (
 );
 
 CREATE TRIGGER order_moddatetime
-    BEFORE UPDATE ON carts
+    BEFORE UPDATE ON orders
     FOR EACH ROW
     EXECUTE PROCEDURE moddatetime (updated_at);
 
