@@ -25,4 +25,4 @@ CREATE UNIQUE INDEX ON "cart_items" ("cart_id", "menu_id");
 CREATE INDEX cart_item_menu_id ON cart_items(menu_id);
 
 -- Create index on "updated_at" column of "cart_items" table
-CREATE INDEX cart_item_updated_at ON cart_items(updated_at);
+CREATE INDEX cart_item_cart_updated_at ON cart_items(cart_id, updated_at);
