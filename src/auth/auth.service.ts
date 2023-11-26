@@ -5,9 +5,9 @@ import { LoginRespDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
-    constructor(private jwtService: JwtService) { }
-    async signIn(user: Partial<UserModel>): Promise<LoginRespDto> {
-        const payload = { sub: user.id, username: user.username }
-        return new LoginRespDto(await this.jwtService.signAsync(payload))
-    }
+  constructor(private jwtService: JwtService) {}
+  async signIn(user: Partial<UserModel>): Promise<LoginRespDto> {
+    const payload = { sub: user.id, username: user.username };
+    return new LoginRespDto(await this.jwtService.signAsync(payload));
+  }
 }

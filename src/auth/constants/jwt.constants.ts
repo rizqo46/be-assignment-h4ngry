@@ -1,5 +1,5 @@
-import { ConfigModule } from "@nestjs/config"
+import { ConfigModule } from '@nestjs/config';
 
-ConfigModule.forRoot()
+ConfigModule.forRoot();
 
-export const JWT_SECRET = process.env.JWT_SECRET
+export const JWT_SECRET = process.env.JWT_SECRET;

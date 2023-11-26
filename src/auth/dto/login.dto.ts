@@ -1,10 +1,10 @@
 export class LoginDto {
-    username: string;
+  username: string;
 }
 
 export class LoginRespDto {
-    constructor(accessToken: string) {
-        this.accessToken = accessToken
-    }
-    accessToken: string;
+  constructor(accessToken: string) {
+    this.accessToken = accessToken;
+  }
+  accessToken: string;
 }

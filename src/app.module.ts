@@ -8,6 +8,14 @@ import { UsersModule } from './users/users.module';
 import { CartsModule } from './carts/carts.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), SharedModule, OutletsModule, MenusModule, AuthModule, UsersModule, CartsModule],
+  imports: [
+    ConfigModule.forRoot(),
+    SharedModule,
+    OutletsModule,
+    MenusModule,
+    AuthModule,
+    UsersModule,
+    CartsModule,
+  ],
 })
 export class AppModule {}
