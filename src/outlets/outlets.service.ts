@@ -10,11 +10,6 @@ import { OutletModel } from 'src/shared/models/outlets.model';
 export class OutletsService {
     constructor(@InjectKysely() private readonly db: Kysely<DB>) { }
 
-    /**
-     * Retrieves a list of outlets based on the provided pagination request.
-     * @param req - The pagination request object containing parameters such as page size, cursor, and search term.
-     * @returns A list of outlets that match the pagination criteria specified in the `req` object.
-     */
     async findAll(req: PaginationReqDto) {
         req.pageSize = req.pageSize || 5
         const pageSize = req.pageSize;

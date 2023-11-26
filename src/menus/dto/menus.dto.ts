@@ -1,7 +1,7 @@
-import { OutletMenuModel } from "src/shared/models/menus.model"
+import { OutletAndMenuModel } from "src/shared/models/menus.model"
 
 export class OutletMenuDto {
-    constructor(outletModel: Partial<OutletMenuModel>) {
+    constructor(outletModel: Partial<OutletAndMenuModel>) {
         this.name = outletModel.name
         this.uuid = outletModel.uuid
         this.description = outletModel.description

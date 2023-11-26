@@ -7,5 +7,6 @@ import { OutletsModule } from 'src/outlets/outlets.module';
   imports: [OutletsModule],
   controllers: [MenusController],
   providers: [MenusService],
+  exports: [MenusService],
 })
 export class MenusModule {}

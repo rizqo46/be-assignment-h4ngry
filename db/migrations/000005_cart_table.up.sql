@@ -1,12 +1,20 @@
 -- Create "carts" table
 CREATE TABLE "carts" (
-    "id" integer PRIMARY KEY,
-    "uuid" uuid NOT NULL UNIQUE,
+    "id" serial4 PRIMARY KEY,
+    "uuid" uuid NOT NULL UNIQUE DEFAULT uuid_generate_v1mc(),
     "user_id" integer NOT NULL,
     "outlet_id" integer NOT NULL,
     "created_at" timestamp NOT NULL DEFAULT (now ()),
     "updated_at" timestamp NOT NULL DEFAULT (now ())
 );
+
+CREATE EXTENSION moddatetime;
+
+-- Add updated at auto update trigger
+CREATE TRIGGER carts_moddatetime
+    BEFORE UPDATE ON carts
+    FOR EACH ROW
+    EXECUTE PROCEDURE moddatetime (updated_at);
 
 -- Add foreign key constraints to "carts" table
 ALTER TABLE "carts" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");

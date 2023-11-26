@@ -1,12 +1,18 @@
 -- Create "cart_items" table
 CREATE TABLE "cart_items" (
-    "uuid" uuid NOT NULL UNIQUE,
+	"uuid" uuid NOT NULL UNIQUE DEFAULT uuid_generate_v1mc(),
     "cart_id" integer NOT NULL,
     "menu_id" integer NOT NULL,
     "quantity" integer NOT NULL,
     "created_at" timestamp NOT NULL DEFAULT (now ()),
     "updated_at" timestamp NOT NULL DEFAULT (now ())
 );
+
+-- Add updated at auto update trigger
+CREATE TRIGGER cart_items_moddatetime
+    BEFORE UPDATE ON cart_items
+    FOR EACH ROW
+    EXECUTE PROCEDURE moddatetime (updated_at);
 
 -- Add foreign key constraint to "cart_items" table
 ALTER TABLE "cart_items" ADD FOREIGN KEY ("menu_id") REFERENCES "menus" ("id");

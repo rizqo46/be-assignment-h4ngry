@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectKysely } from "nestjs-kysely";
-import { DB } from 'src/shared/models/d.db';
+import { DB, Menus } from 'src/shared/models/d.db';
 import { Kysely } from 'kysely'
 import { PaginationReqDto, PaginationRespDto } from 'src/shared/dto/pagination.dto';
-import { OutletMenuModel } from 'src/shared/models/menus.model';
+import { MenuModel, OutletAndMenuModel, OutletMenuModel } from 'src/shared/models/menus.model';
 import { OutletMenuDto } from './dto/menus.dto';
 
 @Injectable()
 export class MenusService {
     constructor(@InjectKysely() private readonly db: Kysely<DB>) { }
 
-    async findOutletMenu(outletId: number, req: PaginationReqDto) {
+    async findOutletMenus(outletId: number, req: PaginationReqDto) {
         req.pageSize = req.pageSize || 5
         const pageSize = req.pageSize;
         const cursor = req.cursor;
@@ -42,7 +42,7 @@ export class MenusService {
         return await query.execute();
     }
 
-    async parseFindAllResponse(req: PaginationReqDto, outletMenus: Partial<OutletMenuModel[]>): Promise<PaginationRespDto> {
+    async parseFindAllResponse(req: PaginationReqDto, outletMenus: Partial<OutletAndMenuModel[]>): Promise<PaginationRespDto> {
         let nextCursor = outletMenus.length != 0 &&
             outletMenus.length == req.pageSize ? outletMenus[outletMenus.length - 1].id : null
 
@@ -53,5 +53,32 @@ export class MenusService {
 
 
         return new PaginationRespDto(outletMenusDto, nextCursor, req.pageSize)
+    }
+    async findOne(criteria: Partial<MenuModel>): Promise<Partial<MenuModel>> {
+        let query = this.db.
+            selectFrom("menus").
+            select("id")
+
+        if (criteria.uuid) {
+            query = query.where("uuid", "=", criteria.uuid)
+        }
+
+        return await query.executeTakeFirst()
+    }
+
+    async findOutletMenu(criteria: Partial<OutletMenuModel>): Promise<Partial<OutletMenuModel>> {
+        let query = this.db.
+            selectFrom("outlets_menus").
+            select(["menu_id", "is_available"])
+            
+        if (criteria.outlet_id) {
+            query = query.where("outlet_id", "=", criteria.outlet_id)
+        }
+
+        if (criteria.menu_id) {
+            query = query.where("menu_id", "=", criteria.menu_id)
+        }
+        
+        return await query.executeTakeFirst()
     }
 }

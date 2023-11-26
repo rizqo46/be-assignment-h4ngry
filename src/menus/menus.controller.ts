@@ -28,7 +28,7 @@ export class MenusController {
       }
 
 
-    let outletMenus = await this.menusService.findOutletMenu(outlet.id, req)
+    let outletMenus = await this.menusService.findOutletMenus(outlet.id, req)
 
     return this.menusService.parseFindAllResponse(req, outletMenus)
   }

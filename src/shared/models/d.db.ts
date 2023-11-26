@@ -8,6 +8,24 @@ export type Int8 = ColumnType<string, bigint | number | string, bigint | number 
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
+export interface CartItems {
+  cart_id: number;
+  created_at: Generated<Timestamp>;
+  menu_id: number;
+  quantity: number;
+  updated_at: Generated<Timestamp>;
+  uuid: string;
+}
+
+export interface Carts {
+  created_at: Generated<Timestamp>;
+  id: number;
+  outlet_id: number;
+  updated_at: Generated<Timestamp>;
+  user_id: number;
+  uuid: string;
+}
+
 export interface Menus {
   created_at: Generated<Timestamp>;
   description: string;
@@ -50,6 +68,8 @@ export interface Users {
 }
 
 export interface DB {
+  cart_items: CartItems;
+  carts: Carts;
   menus: Menus;
   outlets: Outlets;
   outlets_menus: OutletsMenus;
