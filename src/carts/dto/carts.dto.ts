@@ -1,3 +1,4 @@
+import { PartialType } from "@nestjs/swagger";
 import { IsInt, IsUUID, Min } from "class-validator";
 
 export class AddToCartDto {
@@ -11,3 +12,5 @@ export class AddToCartDto {
     @Min(1)
     quantity: number;
 } 
+
+export class UpdateCartDto extends PartialType(AddToCartDto) {}

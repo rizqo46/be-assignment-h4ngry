@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectKysely } from "nestjs-kysely";
 import { DB } from 'src/shared/models/d.db';
 import { Kysely, sql } from 'kysely'
@@ -128,5 +128,52 @@ export class CartsService {
         query = query.orderBy("cart_items.updated_at desc")
 
         return await query.execute()
+    }
+
+    async validateCartItem(itemUuid: string, userId: number) {
+        let cartItem = await this.getCartItemWithCart(itemUuid)
+        if (!cartItem) {
+            throw new NotFoundException("cart item is not found")
+        }
+
+        if (cartItem.user_id != userId) {
+            throw new ForbiddenException("cart item is not belong to user")
+        }
+
+        return cartItem
+    }
+
+    async getCartItemWithCart(itemUuid: string) {
+        let query = this.db.selectFrom("cart_items").
+            innerJoin("carts", "cart_items.cart_id", "carts.id").
+            select(["carts.user_id", "cart_items.cart_id", "cart_items.quantity"])
+
+        query = query.where("cart_items.uuid", "=", itemUuid)
+
+        return await query.executeTakeFirst()
+    }
+
+    async updateCartItem(data: Partial<CartItemModel>) {
+        return await this.db.transaction().execute(async (trx) => {
+            trx.
+                updateTable("cart_items").
+                set({
+                    quantity: data.quantity,
+                }).
+                where("cart_items.uuid", "=", data.uuid).executeTakeFirstOrThrow()
+
+            trx.updateTable("carts").
+                set({ updated_at: sql<Date>`NOW()` }).
+                where("carts.id", "=", data.cart_id).
+                execute()
+
+        })
+    }
+
+    async deleteCartItem(itemUuid: string) {
+        return await this.db.
+            deleteFrom("cart_items").
+            where("uuid", "=", itemUuid).
+            executeTakeFirst()
     }
 }

@@ -1,10 +1,10 @@
-import { Controller, Get, HttpCode, HttpStatus, UseGuards, Request, Post, Put, Delete, Body, UsePipes, ValidationPipe, BadRequestException, Query } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, UseGuards, Request, Post, Put, Delete, Body, UsePipes, ValidationPipe, BadRequestException, Query, Param, ParseUUIDPipe, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { CartsService } from './carts.service';
 import { JWTGuard } from 'src/auth/auth.guard';
 import { Request as RequestExpress } from 'express';
 import { OutletsService } from 'src/outlets/outlets.service';
 import { MenusService } from 'src/menus/menus.service';
-import { AddToCartDto } from './dto/add.carts.dto';
+import { AddToCartDto, UpdateCartDto } from './dto/carts.dto';
 import { SuccessRespDto } from 'src/shared/dto/basic.dto';
 import { PaginationReqDto } from 'src/shared/dto/pagination.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
@@ -60,31 +60,47 @@ export class CartsController {
   }
 
   @UseGuards(JWTGuard)
-  @Put("items/:uuid")
-  @HttpCode(HttpStatus.OK)
-  async updateCartItem(@Request() req) {
-    // validate req quantity must not 0
-    // get cart item with LOCK
-    // update quantity
-    return req.user
+  @Put("items/:itemUuid")
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateCartItem(
+    @Request() req: RequestExpress,
+    @Param('itemUuid', new ParseUUIDPipe()) itemUuid: string,
+    @Body() reqBody: UpdateCartDto,
+  ) {
+    let cartItem = await this.cartsService.validateCartItem(itemUuid, req["user"].sub)
+
+    if (cartItem.quantity === reqBody.quantity) {
+      return new SuccessRespDto()
+    }
+
+    await this.cartsService.updateCartItem({
+      cart_id: cartItem.cart_id,
+      quantity: reqBody.quantity,
+      uuid: itemUuid,
+    })
+
+    return new SuccessRespDto()
   }
 
   @UseGuards(JWTGuard)
-  @Delete("items/:uuid")
-  @HttpCode(HttpStatus.OK)
-  async deleteCartItem(@Request() req) {
-    // get cart item
-    // delete cart item
-    return req.user
+  @Delete("items/:itemUuid")
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async deleteCartItem(
+    @Request() req: RequestExpress,
+    @Param('itemUuid', new ParseUUIDPipe()) itemUuid: string,
+  ) {
+    await this.cartsService.validateCartItem(itemUuid, req["user"].sub)
+    await this.cartsService.deleteCartItem(itemUuid)
+    return new SuccessRespDto()
   }
 
   @UseGuards(JWTGuard)
   @Delete(":uuid")
-  @HttpCode(HttpStatus.OK)
-  async deleteCart(@Request() req) {
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async deleteCart(@Request() req: RequestExpress) {
     // get cart
     // delete cart item
     // delete cart
-    return req.user
+    return req[""]
   }
 }
