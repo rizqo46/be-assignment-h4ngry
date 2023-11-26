@@ -6,7 +6,6 @@ import { OutletsService } from 'src/outlets/outlets.service';
 import { MenusService } from 'src/menus/menus.service';
 import { AddToCartDto, UpdateCartDto } from './dto/carts.dto';
 import { SuccessRespDto } from 'src/shared/dto/basic.dto';
-import { PaginationReqDto } from 'src/shared/dto/pagination.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiBearerAuth()
@@ -33,12 +32,12 @@ export class CartsController {
   async addToCart(@Request() req: RequestExpress, @Body() reqBody: AddToCartDto) {
     let outlet = await this.outletService.findOne(reqBody.outletUuid)
     if (!outlet) {
-      throw new BadRequestException("outlet not found")
+      throw new NotFoundException("outlet not found")
     }
 
     let menu = await this.menuService.findOne({ uuid: reqBody.menuUuid })
     if (!menu) {
-      throw new BadRequestException("menu not found")
+      throw new NotFoundException("menu not found")
     }
 
     let outletMenu = await this.menuService.findOutletMenu({ menu_id: menu.id, outlet_id: outlet.id })
