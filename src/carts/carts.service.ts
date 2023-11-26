@@ -15,7 +15,7 @@ import { CartItemRespDto, CartsRespDto } from './dto/get.carts.dto';
 
 @Injectable()
 export class CartsService {
-  constructor(@InjectKysely() private readonly db: Kysely<DB>) {}
+  constructor(@InjectKysely() private readonly db: Kysely<DB>) { }
 
   addCartItem(
     cartReq: Partial<CartModel>,
@@ -196,7 +196,7 @@ export class CartsService {
     const cart = await this.db
       .selectFrom('carts')
       .where('uuid', '=', cartUuid)
-      .select(['id', 'user_id'])
+      .select(['id', 'user_id', 'outlet_id'])
       .executeTakeFirst();
 
     if (!cart) {
@@ -230,5 +230,15 @@ export class CartsService {
         .where('id', '=', id)
         .executeTakeFirstOrThrow();
     });
+  }
+
+  async getCartItems(cartId: number) {
+    let query = this.db.selectFrom("cart_items").
+      select(["menu_id", "quantity"]).
+      orderBy("cart_items.menu_id asc")
+
+    query = query.where("cart_id", "=", cartId)
+
+    return await query.execute()
   }
 }

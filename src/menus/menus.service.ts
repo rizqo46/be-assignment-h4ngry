@@ -12,7 +12,7 @@ import { OutletMenuDto, OutletMenuRespDto } from './dto/menus.dto';
 
 @Injectable()
 export class MenusService {
-  constructor(@InjectKysely() private readonly db: Kysely<DB>) {}
+  constructor(@InjectKysely() private readonly db: Kysely<DB>) { }
 
   async findOutletMenus(outletId: number, req: PaginationReqDto) {
     req.pageSize = req.pageSize || 5;
@@ -88,5 +88,34 @@ export class MenusService {
     }
 
     return await query.executeTakeFirst();
+  }
+
+  async getOutletAvailableMenus(
+    outletId: number, menusId: number[],
+  ) {
+    let query = this.db
+      .selectFrom('outlets_menus')
+      .select(['menu_id'])
+      .orderBy("menu_id asc")
+
+    query = query.
+      where('outlet_id', '=', outletId).
+      where("is_available", "=", true)
+
+    if (menusId.length != 0) {
+      query = query.where('menu_id', 'in', menusId);
+    }
+
+    return await query.execute();
+  }
+
+  async getMenus(menusId: number[]) {
+    let query = this.db.selectFrom("menus").
+      select(["id", "price"]).orderBy("id asc")
+
+    query = query.where("id", "in", menusId)
+
+    return await query.execute()
+
   }
 }

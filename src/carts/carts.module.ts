@@ -9,5 +9,6 @@ import { OutletsModule } from 'src/outlets/outlets.module';
   imports: [AuthModule, MenusModule, OutletsModule],
   controllers: [CartsController],
   providers: [CartsService],
+  exports: [CartsService],
 })
 export class CartsModule {}
