@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, HttpStatus, UseGuards, Request, Post, Put, Delete, Body, UsePipes, ValidationPipe, BadRequestException } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, UseGuards, Request, Post, Put, Delete, Body, UsePipes, ValidationPipe, BadRequestException, Query } from '@nestjs/common';
 import { CartsService } from './carts.service';
 import { JWTGuard } from 'src/auth/auth.guard';
 import { Request as RequestExpress } from 'express';
@@ -6,7 +6,10 @@ import { OutletsService } from 'src/outlets/outlets.service';
 import { MenusService } from 'src/menus/menus.service';
 import { AddToCartDto } from './dto/add.carts.dto';
 import { SuccessRespDto } from 'src/shared/dto/basic.dto';
+import { PaginationReqDto } from 'src/shared/dto/pagination.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('carts')
 export class CartsController {
   constructor(
@@ -19,8 +22,8 @@ export class CartsController {
   @Get()
   @HttpCode(HttpStatus.OK)
   async getAll(@Request() req: RequestExpress) {
-    // get all cart with its items
-    return req["user"]
+
+    return await this.cartsService.getUserCartsWithItems(req["user"].sub)
   }
 
   @UseGuards(JWTGuard)

@@ -11,6 +11,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('API Documentation')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
     
   await SwaggerModule.loadPluginMetadata(metadata);

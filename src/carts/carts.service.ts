@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectKysely } from "nestjs-kysely";
-import { CartItems, DB } from 'src/shared/models/d.db';
+import { DB } from 'src/shared/models/d.db';
 import { Kysely, sql } from 'kysely'
-import { CartItemModel, CartModel } from 'src/shared/models/carts.model';
+import { CartItemModel, CartModel, CartWithOutletModel } from 'src/shared/models/carts.model';
+import { CartItemRespDto, CartsRespDto } from './dto/get.carts.dto';
 
 @Injectable()
 export class CartsService {
@@ -56,5 +57,76 @@ export class CartsService {
             return await qInsertCartItem.execute()
 
         })
+    }
+
+    async getUserCartsWithItems(userId: number) {
+        // Get carts
+        let carts = await this.getUserCartsWithOutlet(userId)
+
+        // Define carts response
+        let cartsResp: CartsRespDto[] = []
+
+        for (let i = 0; i < carts.length; i++) {
+            const cart = carts[i];
+
+            // get cart items for every cart
+            let cartItems = await this.getCartItemsWithMenu(cart)
+
+            let cartItemsResp: CartItemRespDto[] = []
+            cartItems.forEach(item => {
+                // Convert item to response
+                cartItemsResp.push(new CartItemRespDto(item))
+            });
+
+            // Populate carts response
+            cartsResp.push(new CartsRespDto(cart, cartItemsResp))
+        }
+
+        return cartsResp
+    }
+
+    async getUserCartsWithOutlet(userId: number) {
+        let query = this.db.selectFrom("carts").
+            leftJoin("outlets", "carts.outlet_id", "outlets.id").
+            select([
+                "carts.id",
+                "carts.uuid",
+                "carts.updated_at",
+                "outlets.name as outlet_name",
+                "outlets.uuid as outlet_uuid",
+            ])
+
+        query = query.where("carts.user_id", "=", userId)
+
+        query = query.orderBy("carts.updated_at desc")
+
+        return query.execute()
+    }
+
+    async getCartItemsWithMenu(cart: Partial<CartWithOutletModel>) {
+        let query = this.db.
+            selectFrom("cart_items").
+            leftJoin("menus", "menus.id", "cart_items.menu_id").
+            leftJoin("outlets_menus", (join) =>
+                // I notice bug on join with multiple condition :(
+                join.
+                    on("outlets_menus.outlet_id", "=", cart.outlet_id).
+                    onRef("cart_items.menu_id", "=", "outlets_menus.menu_id")
+            ).
+            select([
+                "cart_items.uuid",
+                "cart_items.quantity",
+                "cart_items.updated_at",
+                "outlets_menus.is_available as is_available",
+                "menus.name",
+                "menus.price",
+                "menus.image",
+            ])
+
+        query = query.where("cart_items.cart_id", "=", cart.id)
+
+        query = query.orderBy("cart_items.updated_at desc")
+
+        return await query.execute()
     }
 }

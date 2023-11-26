@@ -14,16 +14,16 @@ export interface CartItems {
   menu_id: number;
   quantity: number;
   updated_at: Generated<Timestamp>;
-  uuid: string;
+  uuid: Generated<string>;
 }
 
 export interface Carts {
   created_at: Generated<Timestamp>;
-  id: number;
+  id: Generated<number>;
   outlet_id: number;
   updated_at: Generated<Timestamp>;
   user_id: number;
-  uuid: string;
+  uuid: Generated<string>;
 }
 
 export interface Menus {

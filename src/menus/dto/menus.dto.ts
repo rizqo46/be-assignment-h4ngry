@@ -10,10 +10,10 @@ export class OutletMenuDto {
         this.description = outletModel.description
         this.image = outletModel.image
         this.price = outletModel.price
-        this.is_available = outletModel.is_available
+        this.isAvailable = outletModel.is_available
     }
     
-    is_available: boolean;
+    isAvailable: boolean;
 
     @ApiProperty({example: "Creamy Alfredo sauce with grilled chicken"})
     description: string;
