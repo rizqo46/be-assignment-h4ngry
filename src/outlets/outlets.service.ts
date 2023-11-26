@@ -3,7 +3,7 @@ import { PaginationReqDto, PaginationRespDto } from 'src/shared/dto/pagination.d
 import { InjectKysely } from "nestjs-kysely";
 import { DB } from 'src/shared/models/d.db';
 import { Kysely } from 'kysely'
-import { OutletDto } from './dto/outlets.dto';
+import { OutletDto, OutletRespDto } from './dto/outlets.dto';
 import { OutletModel } from 'src/shared/models/outlets.model';
 
 @Injectable()
@@ -32,7 +32,7 @@ export class OutletsService {
         return await query.execute();
     }
 
-    async parseFindAllResponse(req: PaginationReqDto, outlets: Partial<OutletModel>[]): Promise<PaginationRespDto> {
+    async parseFindAllResponse(req: PaginationReqDto, outlets: Partial<OutletModel>[]): Promise<OutletRespDto> {
         let nextCursor = outlets.length != 0 &&
             outlets.length == req.pageSize ? outlets[outlets.length - 1].id : null
 
@@ -42,7 +42,7 @@ export class OutletsService {
         });
 
 
-        return new PaginationRespDto(outletsDto, nextCursor, req.pageSize)
+        return new OutletRespDto(outletsDto, nextCursor, req.pageSize)
     }
 
     async findOne(uuid: string): Promise<Partial<OutletModel>> {

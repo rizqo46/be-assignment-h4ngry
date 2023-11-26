@@ -1,3 +1,5 @@
+import { Type } from "class-transformer";
+import { PaginationRespDto } from "src/shared/dto/pagination.dto";
 import { OutletModel } from "src/shared/models/outlets.model";
 
 export class OutletDto {
@@ -13,4 +15,9 @@ export class OutletDto {
     longitude: number
     name: string;
     uuid: string;   
+}
+
+export class OutletRespDto extends PaginationRespDto<OutletDto> {
+    @Type(()=> OutletDto)
+    data: OutletDto[];
 }

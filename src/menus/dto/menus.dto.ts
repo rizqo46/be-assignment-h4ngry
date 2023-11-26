@@ -1,3 +1,6 @@
+import { ApiProperty } from "@nestjs/swagger"
+import { Type } from "class-transformer"
+import { PaginationRespDto } from "src/shared/dto/pagination.dto"
 import { OutletAndMenuModel } from "src/shared/models/menus.model"
 
 export class OutletMenuDto {
@@ -11,9 +14,24 @@ export class OutletMenuDto {
     }
     
     is_available: boolean;
+
+    @ApiProperty({example: "Creamy Alfredo sauce with grilled chicken"})
     description: string;
+
+    @ApiProperty({example: "chicken_alfredo.jpg"})
     image: string;
+
+    @ApiProperty({example: "Chicken Alfredo Pasta"})
     name: string;
+
+    @ApiProperty({example: "a5b7f222-8b80-11ee-aa76-2f449b6951b6"})
     uuid: string;
+
+    @ApiProperty({example: 90000})
     price: number;
+}
+
+export class OutletMenuRespDto extends PaginationRespDto<OutletMenuDto> {
+    @Type(()=> OutletMenuDto)
+    data: OutletMenuDto[];
 }

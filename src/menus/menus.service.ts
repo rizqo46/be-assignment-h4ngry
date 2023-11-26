@@ -4,7 +4,7 @@ import { DB, Menus } from 'src/shared/models/d.db';
 import { Kysely } from 'kysely'
 import { PaginationReqDto, PaginationRespDto } from 'src/shared/dto/pagination.dto';
 import { MenuModel, OutletAndMenuModel, OutletMenuModel } from 'src/shared/models/menus.model';
-import { OutletMenuDto } from './dto/menus.dto';
+import { OutletMenuDto, OutletMenuRespDto } from './dto/menus.dto';
 
 @Injectable()
 export class MenusService {
@@ -42,7 +42,7 @@ export class MenusService {
         return await query.execute();
     }
 
-    async parseFindAllResponse(req: PaginationReqDto, outletMenus: Partial<OutletAndMenuModel[]>): Promise<PaginationRespDto> {
+    async parseFindAllResponse(req: PaginationReqDto, outletMenus: Partial<OutletAndMenuModel[]>): Promise<OutletMenuRespDto> {
         let nextCursor = outletMenus.length != 0 &&
             outletMenus.length == req.pageSize ? outletMenus[outletMenus.length - 1].id : null
 
@@ -52,7 +52,7 @@ export class MenusService {
         });
 
 
-        return new PaginationRespDto(outletMenusDto, nextCursor, req.pageSize)
+        return new OutletMenuRespDto(outletMenusDto, nextCursor, req.pageSize)
     }
     async findOne(criteria: Partial<MenuModel>): Promise<Partial<MenuModel>> {
         let query = this.db.
