@@ -25,9 +25,7 @@ import { MenusService } from 'src/menus/menus.service';
 import { AddToCartDto, UpdateCartItemDto } from './dto/carts.dto';
 import { SuccessRespDto } from 'src/shared/dto/basic.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import {
-  PaginationReqDtoV2,
-} from 'src/shared/dto/pagination.dto';
+import { PaginationReqDtoV2 } from 'src/shared/dto/pagination.dto';
 
 const cartsControllerName = 'carts';
 
@@ -128,7 +126,10 @@ export class CartsController {
     @Request() req: RequestExpress,
     @Param('itemUuid', new ParseUUIDPipe()) itemUuid: string,
   ) {
-    let cartItem = await this.cartsService.validateCartItem(itemUuid, req['user'].sub);
+    const cartItem = await this.cartsService.validateCartItem(
+      itemUuid,
+      req['user'].sub,
+    );
     await this.cartsService.deleteCartItem(itemUuid, cartItem.cart_id);
     return new SuccessRespDto();
   }

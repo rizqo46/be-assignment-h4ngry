@@ -28,7 +28,7 @@ export class CartsService {
   constructor(
     @InjectKysely() private readonly db: Kysely<DB>,
     private readonly outletsRepo: OutletsRepo,
-  ) { }
+  ) {}
 
   private async upsertCart(trx: Kysely<DB>, cartReq: Partial<CartModel>) {
     let query = trx.insertInto('carts');
@@ -246,9 +246,9 @@ export class CartsService {
 
   async deleteCartItem(itemUuid: string, cartId: number) {
     return await this.db.transaction().execute(async (trx) => {
-      await this.deleteCartItemFromDB(trx, itemUuid)
-      return await this.validateCartAfterRemoveItem(trx, cartId)
-    })
+      await this.deleteCartItemFromDB(trx, itemUuid);
+      return await this.validateCartAfterRemoveItem(trx, cartId);
+    });
   }
 
   private async deleteCartItemFromDB(trx: Kysely<DB>, itemUuid: string) {
@@ -261,12 +261,12 @@ export class CartsService {
   private async validateCartAfterRemoveItem(trx: Kysely<DB>, cartId: number) {
     // This function is validate cart after remove an item from cart
     // if cart is empty then delete the cart
-    let cartItems = await this.getCartItems(trx, cartId, 1)
+    const cartItems = await this.getCartItems(trx, cartId, 1);
     if (cartItems.length > 0) {
-      return
+      return;
     }
 
-    return await this.deleteCart(trx, cartId)
+    return await this.deleteCart(trx, cartId);
   }
 
   async getCart(cartUuid: string) {
@@ -310,7 +310,7 @@ export class CartsService {
       .orderBy('cart_items.menu_id asc');
 
     if (limit) {
-      query = query.limit(limit)
+      query = query.limit(limit);
     }
 
     query = query.where('cart_id', '=', cartId);

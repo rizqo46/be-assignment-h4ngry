@@ -12,11 +12,11 @@ export class OutletsService {
   constructor(
     @InjectKysely() private readonly db: Kysely<DB>,
     private readonly outletsRepo: OutletsRepo,
-  ) { }
+  ) {}
 
   async findAll(req: PaginationReqDto) {
-    let outlets = await this.outletsRepo.findMany(this.db, req)
-    return await this.parseFindAllResponse(req, outlets)
+    const outlets = await this.outletsRepo.findMany(this.db, req);
+    return await this.parseFindAllResponse(req, outlets);
   }
 
   async parseFindAllResponse(
@@ -37,6 +37,6 @@ export class OutletsService {
   }
 
   async findOne(uuid: string) {
-    return await this.outletsRepo.findOne(this.db, uuid)
+    return await this.outletsRepo.findOne(this.db, uuid);
   }
 }

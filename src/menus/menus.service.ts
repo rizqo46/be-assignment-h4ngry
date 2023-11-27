@@ -10,13 +10,15 @@ import {
 } from 'src/shared/models/menus.model';
 import { OutletMenuDto, OutletMenuRespDto } from './dto/menus.dto';
 import { OutletsRepo } from 'src/shared/repository/outlets.repo';
+import { MenusRepo } from 'src/shared/repository/menus.repo';
 
 @Injectable()
 export class MenusService {
   constructor(
     @InjectKysely() private readonly db: Kysely<DB>,
     private readonly outletsRepo: OutletsRepo,
-  ) { }
+    private readonly menusRepo: MenusRepo,
+  ) {}
 
   async findOutletMenus(outletUuid: string, req: PaginationReqDto) {
     const outlet = await this.outletsRepo.findOne(this.db, outletUuid);
@@ -24,35 +26,11 @@ export class MenusService {
       throw new NotFoundException("outlet isn't found");
     }
 
-    req.pageSize = req.pageSize || 5;
-    const pageSize = req.pageSize;
-    const cursor = req.cursor;
-    const search = req.search;
-
-    let query = this.db
-      .selectFrom('outlets_menus')
-      .innerJoin('menus', 'menus.id', 'outlets_menus.menu_id')
-      .where('outlets_menus.outlet_id', '=', outlet.id)
-      .select([
-        'outlets_menus.is_available',
-        'menus.image',
-        'menus.name',
-        'menus.description',
-        'menus.uuid',
-        'menus.id',
-      ])
-      .selectAll()
-      .limit(pageSize);
-
-    if (cursor) {
-      query = query.where('menus.id', '>=', cursor).offset(1);
-    }
-
-    if (search) {
-      query = query.where('menus.src_doc', '@@', search + ':*');
-    }
-
-    let outletMenus = await query.execute()
+    const outletMenus = await this.menusRepo.findOutletMenus(
+      this.db,
+      outlet.id,
+      req,
+    );
 
     return await this.parseFindAllResponse(req, outletMenus);
   }
@@ -74,58 +52,22 @@ export class MenusService {
     return new OutletMenuRespDto(outletMenusDto, nextCursor, req.pageSize);
   }
   async findOne(criteria: Partial<MenuModel>): Promise<Partial<MenuModel>> {
-    let query = this.db.selectFrom('menus').select('id');
-
-    if (criteria.uuid) {
-      query = query.where('uuid', '=', criteria.uuid);
-    }
-
-    return await query.executeTakeFirst();
+    return await this.menusRepo.findOne(this.db, criteria);
   }
 
-  async findOutletMenu(
-    criteria: Partial<OutletMenuModel>,
-  ): Promise<Partial<OutletMenuModel>> {
-    let query = this.db
-      .selectFrom('outlets_menus')
-      .select(['menu_id', 'is_available']);
-
-    if (criteria.outlet_id) {
-      query = query.where('outlet_id', '=', criteria.outlet_id);
-    }
-
-    if (criteria.menu_id) {
-      query = query.where('menu_id', '=', criteria.menu_id);
-    }
-
-    return await query.executeTakeFirst();
+  async findOutletMenu(criteria: Partial<OutletMenuModel>) {
+    return await this.menusRepo.findOutletMenu(this.db, criteria);
   }
 
   async getOutletAvailableMenus(outletId: number, menusId: number[]) {
-    let query = this.db
-      .selectFrom('outlets_menus')
-      .select(['menu_id'])
-      .orderBy('menu_id asc');
-
-    query = query
-      .where('outlet_id', '=', outletId)
-      .where('is_available', '=', true);
-
-    if (menusId.length != 0) {
-      query = query.where('menu_id', 'in', menusId);
-    }
-
-    return await query.execute();
+    return await this.menusRepo.getOutletAvailableMenus(
+      this.db,
+      outletId,
+      menusId,
+    );
   }
 
   async getMenus(menusId: number[]) {
-    let query = this.db
-      .selectFrom('menus')
-      .select(['id', 'price'])
-      .orderBy('id asc');
-
-    query = query.where('id', 'in', menusId);
-
-    return await query.execute();
+    return await this.menusRepo.getMenus(this.db, menusId);
   }
 }

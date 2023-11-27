@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { PaginationReqDto } from 'src/shared/dto/pagination.dto';
-import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/shared/models/d.db';
 import { Kysely } from 'kysely';
 

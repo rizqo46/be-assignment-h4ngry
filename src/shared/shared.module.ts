@@ -4,6 +4,8 @@ import { Pool } from 'pg';
 import { KyselyModule } from 'nestjs-kysely';
 import { ConfigModule } from '@nestjs/config';
 import { OutletsRepo } from './repository/outlets.repo';
+import { MenusRepo } from './repository/menus.repo';
+import { UsersRepo } from './repository/users.repo';
 
 @Module({
   imports: [
@@ -17,7 +19,7 @@ import { OutletsRepo } from './repository/outlets.repo';
       log: ['query'],
     }),
   ],
-  providers: [OutletsRepo],
-  exports: [OutletsRepo],
+  providers: [OutletsRepo, MenusRepo, UsersRepo],
+  exports: [OutletsRepo, MenusRepo, UsersRepo],
 })
 export class SharedModule {}
