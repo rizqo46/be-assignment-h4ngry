@@ -4,6 +4,7 @@ import { UsersModule } from 'src/users/users.module';
 import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { JWT_SECRET } from './constants/jwt.constants';
+import { SharedModule } from 'src/shared/shared.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { JWT_SECRET } from './constants/jwt.constants';
       secret: JWT_SECRET,
       signOptions: { expiresIn: '600d' },
     }),
+    SharedModule,
   ],
   providers: [AuthService],
   controllers: [AuthController],

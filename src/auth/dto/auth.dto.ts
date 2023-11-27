@@ -1,11 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class LoginDto {
-  @ApiProperty({ example: 'h4ngry1' })
+export class AuthReqDto {
+  @ApiProperty({ examples: ['h4ngry1', 'hunger'] })
   username: string;
 }
 
-export class LoginRespDto {
+export class AuthRespDto {
   constructor(accessToken: string) {
     this.accessToken = accessToken;
   }

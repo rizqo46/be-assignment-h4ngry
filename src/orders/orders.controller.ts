@@ -23,7 +23,7 @@ export class OrdersController {
 
   @UseGuards(JWTGuard)
   @Post()
-  @ApiNotFoundResponse({description: "Cart not found"})
+  @ApiNotFoundResponse({ description: 'Cart not found' })
   @UsePipes(new ValidationPipe({ transform: true }))
   async createOrder(
     @Request() req: RequestExpress,

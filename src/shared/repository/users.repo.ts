@@ -8,7 +8,15 @@ export class UsersRepo {
     return await db
       .selectFrom('users')
       .where('username', '=', username)
-      .selectAll()
+      .select(['id', 'username'])
+      .executeTakeFirst();
+  }
+
+  async cretae(db: Kysely<DB>, username: string) {
+    return await db
+      .insertInto('users')
+      .values({ username: username })
+      .returning(['id', 'username'])
       .executeTakeFirst();
   }
 }
