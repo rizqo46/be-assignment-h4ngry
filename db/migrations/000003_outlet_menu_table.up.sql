@@ -17,11 +17,11 @@ CREATE UNIQUE INDEX ON outlets_menus (outlet_id, menu_id);
 CREATE INDEX outlet_menu_menu_id ON outlets_menus(menu_id);
 
 -- Insert data into 'outlets_menus' table using a loop
-DO $$
-BEGIN
-  FOR i IN 1..30 LOOP
-    INSERT INTO outlets_menus (menu_id, outlet_id, is_available)
-    SELECT i, j, random() > 0.15
-    FROM generate_series(1, 10) AS j;
-  END LOOP;
-END $$;
+INSERT INTO outlets_menus (menu_id, outlet_id, is_available)
+SELECT
+  i,
+  j,
+  random() > 0.15
+FROM
+  generate_series(1, 30) AS i,
+  generate_series(1, 10) AS j;
