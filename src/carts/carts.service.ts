@@ -135,6 +135,7 @@ export class CartsService {
     let query = this.db
       .selectFrom('carts')
       .leftJoin('outlets', 'carts.outlet_id', 'outlets.id')
+      .innerJoin("cart_items", "carts.id", "cart_items.cart_id")
       .select([
         'carts.id',
         'carts.uuid',
