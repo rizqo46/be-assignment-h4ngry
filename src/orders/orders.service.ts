@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { Kysely, Transaction } from 'kysely';
-import { InsertObjectOrList } from 'kysely/dist/cjs/parser/insert-values-parser';
+import { Kysely } from 'kysely';
 import { InjectKysely } from 'nestjs-kysely';
 import { CartsService } from 'src/carts/carts.service';
 import { DB } from 'src/shared/models/d.db';
-import { OrderItemModel, OrderModel } from 'src/shared/models/orders.model';
+import { OrderItemModel } from 'src/shared/models/orders.model';
 import { OrderReqDto } from './dto/orders.dto';
 import { CartItemModel } from 'src/shared/models/carts.model';
 import { MenuModel } from 'src/shared/models/menus.model';
 import { SuccessRespDto } from 'src/shared/dto/basic.dto';
 import { CartsRepo } from 'src/shared/repository/carts.repo';
 import { MenusRepo } from 'src/shared/repository/menus.repo';
+import { OrdersRepo } from 'src/shared/repository/orders.repo';
 
 @Injectable()
 export class OrdersService {
@@ -19,6 +19,7 @@ export class OrdersService {
     private readonly cartsService: CartsService,
     private readonly cartsRepo: CartsRepo,
     private readonly menusRepo: MenusRepo,
+    private readonly ordersRepo: OrdersRepo,
   ) {}
 
   async makeOrder(
@@ -69,14 +70,14 @@ export class OrdersService {
       await this.cartsRepo.lockCartItems(trx, cart.id);
 
       // Create the order in the database
-      const order = await this.createOrder(trx, {
+      const order = await this.ordersRepo.createOrder(trx, {
         outlet_id: cart.outlet_id,
         user_id: userId,
         total: total,
       });
 
       // Create the order items in the database
-      await this.createOrderItems(trx, order.id, orderItems);
+      await this.ordersRepo.createOrderItems(trx, order.id, orderItems);
 
       // Delete the cart items
       await this.cartsRepo.deleteCartItems(trx, cart.id);
@@ -108,39 +109,5 @@ export class OrdersService {
     });
 
     return orderItems;
-  }
-
-  private async createOrder(trx: Transaction<DB>, order: Partial<OrderModel>) {
-    const q = trx
-      .insertInto('orders')
-      .values({
-        outlet_id: order.outlet_id,
-        user_id: order.user_id,
-        total: order.total,
-      })
-      .returning('id');
-
-    return await q.executeTakeFirstOrThrow();
-  }
-
-  private async createOrderItems(
-    trx: Transaction<DB>,
-    orderId: number,
-    orderItems: Partial<OrderItemModel>[],
-  ) {
-    const values: InsertObjectOrList<DB, 'order_items'>[] = [];
-
-    orderItems.forEach((item) => {
-      values.push({
-        order_id: orderId,
-        menu_id: item.menu_id,
-        quantity: item.quantity,
-        sub_total: item.sub_total,
-      });
-    });
-
-    const q = trx.insertInto('order_items').values(values);
-
-    return await q.executeTakeFirstOrThrow();
   }
 }

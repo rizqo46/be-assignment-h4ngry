@@ -7,6 +7,7 @@ import { OutletsRepo } from './repository/outlets.repo';
 import { MenusRepo } from './repository/menus.repo';
 import { UsersRepo } from './repository/users.repo';
 import { CartsRepo } from './repository/carts.repo';
+import { OrdersRepo } from './repository/orders.repo';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { CartsRepo } from './repository/carts.repo';
       log: ['query'],
     }),
   ],
-  providers: [OutletsRepo, MenusRepo, UsersRepo, CartsRepo],
-  exports: [OutletsRepo, MenusRepo, UsersRepo, CartsRepo],
+  providers: [OutletsRepo, MenusRepo, UsersRepo, CartsRepo, OrdersRepo],
+  exports: [OutletsRepo, MenusRepo, UsersRepo, CartsRepo, OrdersRepo],
 })
 export class SharedModule {}
