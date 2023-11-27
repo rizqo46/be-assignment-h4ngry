@@ -11,7 +11,8 @@ import {
   CartModel,
   CartWithOutletModel,
 } from 'src/shared/models/carts.model';
-import { CartItemRespDto, CartsRespDto } from './dto/get.carts.dto';
+import { CartItemRespDto, CartsPaginationRespDto, CartsRespDto } from './dto/get.carts.dto';
+import { PaginationReqDto, PaginationReqDtoV2 } from 'src/shared/dto/pagination.dto';
 
 @Injectable()
 export class CartsService {
@@ -71,9 +72,9 @@ export class CartsService {
     });
   }
 
-  async getUserCartsWithItems(userId: number) {
+  async getUserCartsWithItems(userId: number, paginationReq: PaginationReqDtoV2) {
     // Get carts
-    const carts = await this.getUserCartsWithOutlet(userId);
+    const carts = await this.getUserCartsWithOutlet(userId, paginationReq);
 
     // Define carts response
     const cartsResp: CartsRespDto[] = [];
@@ -94,10 +95,16 @@ export class CartsService {
       cartsResp.push(new CartsRespDto(cart, cartItemsResp));
     }
 
-    return cartsResp;
+    return new CartsPaginationRespDto(cartsResp, paginationReq.page, paginationReq.pageSize)
   }
 
-  async getUserCartsWithOutlet(userId: number) {
+  private async getUserCartsWithOutlet(userId: number, paginationReq: PaginationReqDtoV2) {
+    paginationReq.page = paginationReq.page || 1
+    paginationReq.pageSize = paginationReq.pageSize || 2
+    const page = paginationReq.page
+    const pageSize = paginationReq.pageSize
+    const offset = (page-1) * pageSize 
+
     let query = this.db
       .selectFrom('carts')
       .leftJoin('outlets', 'carts.outlet_id', 'outlets.id')
@@ -108,6 +115,8 @@ export class CartsService {
         'outlets.name as outlet_name',
         'outlets.uuid as outlet_uuid',
       ]);
+    
+    query = query.offset(offset).limit(pageSize)
 
     query = query.where('carts.user_id', '=', userId);
 

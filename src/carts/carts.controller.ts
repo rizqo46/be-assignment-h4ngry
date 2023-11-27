@@ -15,6 +15,7 @@ import {
   Param,
   ParseUUIDPipe,
   NotFoundException,
+  Query,
 } from '@nestjs/common';
 import { CartsService } from './carts.service';
 import { JWTGuard } from 'src/auth/auth.guard';
@@ -24,6 +25,7 @@ import { MenusService } from 'src/menus/menus.service';
 import { AddToCartDto, UpdateCartDto } from './dto/carts.dto';
 import { SuccessRespDto } from 'src/shared/dto/basic.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { PaginationReqDto, PaginationReqDtoV2 } from 'src/shared/dto/pagination.dto';
 
 @ApiBearerAuth()
 @Controller('carts')
@@ -32,13 +34,16 @@ export class CartsController {
     private readonly cartsService: CartsService,
     private readonly outletService: OutletsService,
     private readonly menuService: MenusService,
-  ) {}
+  ) { }
 
   @UseGuards(JWTGuard)
   @Get()
   @HttpCode(HttpStatus.OK)
-  async getAll(@Request() req: RequestExpress) {
-    return await this.cartsService.getUserCartsWithItems(req['user'].sub);
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getAll(
+    @Request() req: RequestExpress, @Query() reqQuery: PaginationReqDtoV2,
+  ) {
+    return await this.cartsService.getUserCartsWithItems(req['user'].sub, reqQuery);
   }
 
   @UseGuards(JWTGuard)

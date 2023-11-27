@@ -8,6 +8,9 @@ export class PaginationReqDto {
   @Type(() => Number)
   pageSize?: number;
 
+  @Type(() => Number)
+  page?: number;
+
   search?: string | null;
 }
 
@@ -19,6 +22,28 @@ export class PaginationRespDto<T> {
   }
 
   nextCursor?: number | null;
+  pageSize: number;
+
+  @IsArray()
+  data: T[];
+}
+
+export class PaginationReqDtoV2 {
+  @Type(() => Number)
+  pageSize?: number;
+
+  @Type(() => Number)
+  page?: number;
+}
+
+export class PaginationRespDtoV2<T> {
+  constructor(data: T[], page: number, pageSize: number) {
+    this.data = data;
+    this.page = page;
+    this.pageSize = pageSize;
+  }
+
+  page: number;
   pageSize: number;
 
   @IsArray()
