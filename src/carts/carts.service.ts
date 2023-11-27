@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -6,7 +7,6 @@ import {
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/shared/models/d.db';
 import { Kysely } from 'kysely';
-import { CartItemModel, CartModel } from 'src/shared/models/carts.model';
 import {
   CartItemRespDto,
   CartsPaginationRespDto,
@@ -17,6 +17,7 @@ import { OutletsRepo } from 'src/shared/repository/outlets.repo';
 import { AddToCartDto, UpdateCartItemDto } from './dto/carts.dto';
 import { CartsRepo } from 'src/shared/repository/carts.repo';
 import { SuccessRespDto } from 'src/shared/dto/basic.dto';
+import { MenusRepo } from 'src/shared/repository/menus.repo';
 
 @Injectable()
 export class CartsService {
@@ -24,26 +25,42 @@ export class CartsService {
     @InjectKysely() private readonly db: Kysely<DB>,
     private readonly outletsRepo: OutletsRepo,
     private readonly cartsRepo: CartsRepo,
+    private readonly menusRepo: MenusRepo,
   ) {}
-
-  async addCartItem(
-    cartReq: Partial<CartModel>,
-    cartItemReq: Partial<CartItemModel>,
-  ) {
-    return await this.db.transaction().execute(async (trx) => {
-      // Upsert cart
-      const cart = await this.cartsRepo.upsertCart(trx, cartReq);
-
-      // Upsert cart item
-      return await this.cartsRepo.upsertCartItem(trx, cart.id, cartItemReq);
-    });
-  }
 
   async addCartItemV2(reqBody: AddToCartDto, userId: number) {
     const outlet = await this.outletsRepo.findOne(this.db, reqBody.outletUuid);
     if (!outlet) {
       throw new NotFoundException('outlet not found');
     }
+    const menu = await this.menusRepo.findOne(this.db, {
+      uuid: reqBody.menuUuid,
+    });
+    if (!menu) {
+      throw new NotFoundException('menu not found');
+    }
+
+    const outletMenu = await this.menusRepo.findOutletMenu(this.db, {
+      menu_id: menu.id,
+      outlet_id: outlet.id,
+    });
+    if (!outletMenu.is_available) {
+      throw new BadRequestException('menu is not available in selected outlet');
+    }
+
+    return await this.db.transaction().execute(async (trx) => {
+      // Upsert cart
+      const cart = await this.cartsRepo.upsertCart(trx, {
+        outlet_id: outlet.id,
+        user_id: userId,
+      });
+
+      // Upsert cart item
+      return await this.cartsRepo.upsertCartItem(trx, cart.id, {
+        menu_id: menu.id,
+        quantity: reqBody.quantity,
+      });
+    });
   }
 
   async getUserCartsWithItems(

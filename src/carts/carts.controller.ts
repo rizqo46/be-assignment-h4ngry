@@ -11,17 +11,13 @@ import {
   Body,
   UsePipes,
   ValidationPipe,
-  BadRequestException,
   Param,
   ParseUUIDPipe,
-  NotFoundException,
   Query,
 } from '@nestjs/common';
 import { CartsService } from './carts.service';
 import { JWTGuard } from 'src/auth/auth.guard';
 import { Request as RequestExpress } from 'express';
-import { OutletsService } from 'src/outlets/outlets.service';
-import { MenusService } from 'src/menus/menus.service';
 import { AddToCartDto, UpdateCartItemDto } from './dto/carts.dto';
 import { SuccessRespDto } from 'src/shared/dto/basic.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -33,11 +29,7 @@ const cartsControllerName = 'carts';
 @ApiTags(cartsControllerName)
 @Controller(cartsControllerName)
 export class CartsController {
-  constructor(
-    private readonly cartsService: CartsService,
-    private readonly outletService: OutletsService,
-    private readonly menuService: MenusService,
-  ) {}
+  constructor(private readonly cartsService: CartsService) {}
 
   @UseGuards(JWTGuard)
   @Post()
@@ -47,35 +39,8 @@ export class CartsController {
     @Request() req: RequestExpress,
     @Body() reqBody: AddToCartDto,
   ) {
-    const outlet = await this.outletService.findOne(reqBody.outletUuid);
-    if (!outlet) {
-      throw new NotFoundException('outlet not found');
-    }
-
-    const menu = await this.menuService.findOne({ uuid: reqBody.menuUuid });
-    if (!menu) {
-      throw new NotFoundException('menu not found');
-    }
-
-    const outletMenu = await this.menuService.findOutletMenu({
-      menu_id: menu.id,
-      outlet_id: outlet.id,
-    });
-    if (!outletMenu.is_available) {
-      throw new BadRequestException('menu is not available in selected outlet');
-    }
-
-    await this.cartsService.addCartItem(
-      {
-        outlet_id: outlet.id,
-        user_id: req['user'].sub,
-      },
-      {
-        menu_id: menu.id,
-        quantity: reqBody.quantity,
-      },
-    );
-
+    const userId = req['user'].sub;
+    await this.cartsService.addCartItemV2(reqBody, userId);
     return new SuccessRespDto();
   }
 
@@ -87,10 +52,8 @@ export class CartsController {
     @Request() req: RequestExpress,
     @Query() reqQuery: PaginationReqDtoV2,
   ) {
-    return await this.cartsService.getUserCartsWithItems(
-      req['user'].sub,
-      reqQuery,
-    );
+    const userId = req['user'].sub;
+    return await this.cartsService.getUserCartsWithItems(userId, reqQuery);
   }
 
   @UseGuards(JWTGuard)
@@ -101,7 +64,8 @@ export class CartsController {
     @Param('itemUuid', new ParseUUIDPipe()) itemUuid: string,
     @Body() reqBody: UpdateCartItemDto,
   ) {
-    await this.cartsService.updateCartItem(itemUuid, reqBody, req['user'].sub);
+    const userId = req['user'].sub;
+    await this.cartsService.updateCartItem(itemUuid, reqBody, userId);
     return new SuccessRespDto();
   }
 
@@ -112,7 +76,8 @@ export class CartsController {
     @Request() req: RequestExpress,
     @Param('itemUuid', new ParseUUIDPipe()) itemUuid: string,
   ) {
-    await this.cartsService.deleteCartItem(itemUuid, req['user'].sub);
+    const userId = req['user'].sub;
+    await this.cartsService.deleteCartItem(itemUuid, userId);
     return new SuccessRespDto();
   }
 
@@ -123,7 +88,8 @@ export class CartsController {
     @Request() req: RequestExpress,
     @Param('uuid', new ParseUUIDPipe()) uuid: string,
   ) {
-    await this.cartsService.deleteCart(uuid, req['user'].sub);
+    const userId = req['user'].sub;
+    await this.cartsService.deleteCart(uuid, userId);
     return new SuccessRespDto();
   }
 }
