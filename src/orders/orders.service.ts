@@ -10,6 +10,7 @@ import { OrderReqDto } from './dto/orders.dto';
 import { CartItemModel } from 'src/shared/models/carts.model';
 import { MenuModel } from 'src/shared/models/menus.model';
 import { SuccessRespDto } from 'src/shared/dto/basic.dto';
+import { CartsRepo } from 'src/shared/repository/carts.repo';
 
 @Injectable()
 export class OrdersService {
@@ -17,6 +18,7 @@ export class OrdersService {
     @InjectKysely() private readonly db: Kysely<DB>,
     private readonly cartsService: CartsService,
     private readonly menuService: MenusService,
+    private readonly cartsRepo: CartsRepo,
   ) {}
 
   async makeOrder(
@@ -24,10 +26,13 @@ export class OrdersService {
     reqBody: OrderReqDto,
   ): Promise<SuccessRespDto> {
     // Validate the user's cart
-    const cart = await this.cartsService.validateCart(reqBody.cartUuid, userId);
+    const cart = await this.cartsService.getAndValidateCart(
+      reqBody.cartUuid,
+      userId,
+    );
 
     // Retrieve the cart items
-    const cartItems = await this.cartsService.getCartItems(this.db, cart.id);
+    const cartItems = await this.cartsRepo.getCartItems(this.db, cart.id);
 
     // Get the IDs of the menu items in the cart
     const menuIds = cartItems.map((item) => item.menu_id);
@@ -59,8 +64,8 @@ export class OrdersService {
     // Start a database transaction
     await this.db.transaction().execute(async (trx) => {
       // Lock the cart and its items
-      await this.cartsService.lockCart(trx, cart.id);
-      await this.cartsService.lockCartItems(trx, cart.id);
+      await this.cartsRepo.lockCart(trx, cart.id);
+      await this.cartsRepo.lockCartItems(trx, cart.id);
 
       // Create the order in the database
       const order = await this.createOrder(trx, {
@@ -73,10 +78,10 @@ export class OrdersService {
       await this.createOrderItems(trx, order.id, orderItems);
 
       // Delete the cart items
-      await this.cartsService.deleteCartItems(trx, cart.id);
+      await this.cartsRepo.deleteCartItems(trx, cart.id);
 
       // Delete the cart
-      await this.cartsService.deleteCart(trx, cart.id);
+      await this.cartsRepo.deleteCart(trx, cart.id);
     });
 
     if (isSomeMenusNotAvailable) {

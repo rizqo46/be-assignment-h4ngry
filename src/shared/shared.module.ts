@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { OutletsRepo } from './repository/outlets.repo';
 import { MenusRepo } from './repository/menus.repo';
 import { UsersRepo } from './repository/users.repo';
+import { CartsRepo } from './repository/carts.repo';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { UsersRepo } from './repository/users.repo';
       log: ['query'],
     }),
   ],
-  providers: [OutletsRepo, MenusRepo, UsersRepo],
-  exports: [OutletsRepo, MenusRepo, UsersRepo],
+  providers: [OutletsRepo, MenusRepo, UsersRepo, CartsRepo],
+  exports: [OutletsRepo, MenusRepo, UsersRepo, CartsRepo],
 })
 export class SharedModule {}

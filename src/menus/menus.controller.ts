@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  NotFoundException,
-  Param,
-  ParseUUIDPipe,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
 import { MenusService } from './menus.service';
 import { PaginationReqDto } from 'src/shared/dto/pagination.dto';
 import { OutletsService } from 'src/outlets/outlets.service';

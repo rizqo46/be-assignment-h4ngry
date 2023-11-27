@@ -141,7 +141,10 @@ export class CartsController {
     @Request() req: RequestExpress,
     @Param('uuid', new ParseUUIDPipe()) uuid: string,
   ) {
-    const cart = await this.cartsService.validateCart(uuid, req['user'].sub);
+    const cart = await this.cartsService.getAndValidateCart(
+      uuid,
+      req['user'].sub,
+    );
     await this.cartsService.deleteCartAndItsItems(cart.id);
     return new SuccessRespDto();
   }
