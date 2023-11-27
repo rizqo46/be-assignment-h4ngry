@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/shared/models/d.db';
 import { Kysely } from 'kysely';
@@ -13,6 +13,11 @@ export class UsersService {
   ) {}
 
   async findOne(username: string): Promise<Partial<UserModel>> {
-    return await this.usersRepo.findOne(this.db, username);
+    let user =  await this.usersRepo.findOne(this.db, username);
+    if (!user) {
+      throw new BadRequestException('user not found');
+    }
+    
+    return user
   }
 }
