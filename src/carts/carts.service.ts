@@ -147,10 +147,21 @@ export class CartsService {
 
     return await this.db.transaction().execute(async (trx) => {
       await this.cartsRepo.deleteCartItem(trx, itemUuid);
-      return await this.cartsRepo.validateCartAfterRemoveItem(
+
+      // check is exists another item in cart
+      const cartItems = await this.cartsRepo.getCartItems(
         trx,
         cartItem.cart_id,
+        1,
       );
+
+      // if exists then do nothing
+      if (cartItems.length > 0) {
+        return;
+      }
+
+      // if not do delete cart
+      return await this.cartsRepo.deleteCart(trx, cartItem.cart_id);
     });
   }
 

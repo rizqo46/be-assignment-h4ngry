@@ -212,15 +212,4 @@ export class CartsRepo {
       .where('uuid', '=', itemUuid)
       .executeTakeFirst();
   }
-
-  async validateCartAfterRemoveItem(trx: Kysely<DB>, cartId: number) {
-    // This function is validate cart after remove an item from cart
-    // if cart is empty then delete the cart
-    const cartItems = await this.getCartItems(trx, cartId, 1);
-    if (cartItems.length > 0) {
-      return;
-    }
-
-    return await this.deleteCart(trx, cartId);
-  }
 }
