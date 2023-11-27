@@ -1,0 +1,750 @@
+{
+    "openapi": "3.0.0",
+    "paths": {
+        "/outlets": {
+            "get": {
+                "operationId": "OutletsController_findAll",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "pageSize",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "nullable": true,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OutletRespDto"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "outlets"
+                ]
+            }
+        },
+        "/menus/outlets/{uuid}": {
+            "get": {
+                "operationId": "MenusController_findMenusOnOutlet",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "pageSize",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "nullable": true,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OutletMenuRespDto"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "menus"
+                ]
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "operationId": "AuthController_login",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AuthReqDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthRespDto"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Username not registered"
+                    }
+                },
+                "tags": [
+                    "auth"
+                ]
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "operationId": "AuthController_register",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AuthReqDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthRespDto"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Username already registered"
+                    }
+                },
+                "tags": [
+                    "auth"
+                ]
+            }
+        },
+        "/carts": {
+            "post": {
+                "operationId": "CartsController_addToCart",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AddToCartDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessRespDto"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Menu is not available in selected Outlet"
+                    },
+                    "404": {
+                        "description": "Outlet or Menu not found"
+                    }
+                },
+                "tags": [
+                    "carts"
+                ],
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            },
+            "get": {
+                "operationId": "CartsController_getAll",
+                "parameters": [
+                    {
+                        "name": "pageSize",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CartsPaginationRespDto"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "carts"
+                ],
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/carts/items/{itemUuid}": {
+            "put": {
+                "operationId": "CartsController_updateCartItem",
+                "parameters": [
+                    {
+                        "name": "itemUuid",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateCartItemDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessRespDto"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Cart Item not found"
+                    }
+                },
+                "tags": [
+                    "carts"
+                ],
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            },
+            "delete": {
+                "operationId": "CartsController_deleteCartItem",
+                "parameters": [
+                    {
+                        "name": "itemUuid",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessRespDto"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Cart Item not found"
+                    }
+                },
+                "tags": [
+                    "carts"
+                ],
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/carts/{uuid}": {
+            "delete": {
+                "operationId": "CartsController_deleteCart",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessRespDto"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Cart not found"
+                    }
+                },
+                "tags": [
+                    "carts"
+                ],
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/orders": {
+            "post": {
+                "operationId": "OrdersController_createOrder",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OrderReqDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessRespDto"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Cart not found"
+                    }
+                },
+                "tags": [
+                    "orders"
+                ],
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        }
+    },
+    "info": {
+        "title": "API Documentation",
+        "description": "",
+        "version": "1.0",
+        "contact": {}
+    },
+    "tags": [],
+    "servers": [],
+    "components": {
+        "securitySchemes": {
+            "bearer": {
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "type": "http"
+            }
+        },
+        "schemas": {
+            "OutletDto": {
+                "type": "object",
+                "properties": {
+                    "address": {
+                        "type": "string",
+                        "example": "Jl. Majapahit No.462 A, Pedurungan Tengah"
+                    },
+                    "latitude": {
+                        "type": "number",
+                        "example": -7.007683397188739
+                    },
+                    "longitude": {
+                        "type": "number",
+                        "example": 110.47388333909132
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Mataram"
+                    },
+                    "uuid": {
+                        "type": "string",
+                        "example": "5d851804-8cb6-11ee-af3a-8ffbcaf320e2"
+                    }
+                },
+                "required": [
+                    "address",
+                    "latitude",
+                    "longitude",
+                    "name",
+                    "uuid"
+                ]
+            },
+            "OutletRespDto": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OutletDto"
+                        }
+                    },
+                    "nextCursor": {
+                        "type": "number",
+                        "nullable": true
+                    },
+                    "pageSize": {
+                        "type": "number"
+                    }
+                },
+                "required": [
+                    "data",
+                    "pageSize"
+                ]
+            },
+            "OutletMenuDto": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string",
+                        "example": "Creamy Alfredo sauce with grilled chicken"
+                    },
+                    "image": {
+                        "type": "string",
+                        "example": "chicken_alfredo.jpg"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Chicken Alfredo Pasta"
+                    },
+                    "uuid": {
+                        "type": "string",
+                        "example": "a5b7f222-8b80-11ee-aa76-2f449b6951b6"
+                    },
+                    "price": {
+                        "type": "number",
+                        "example": 90000
+                    },
+                    "isAvailable": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "description",
+                    "image",
+                    "name",
+                    "uuid",
+                    "price",
+                    "isAvailable"
+                ]
+            },
+            "OutletMenuRespDto": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OutletMenuDto"
+                        }
+                    },
+                    "nextCursor": {
+                        "type": "number",
+                        "nullable": true
+                    },
+                    "pageSize": {
+                        "type": "number"
+                    }
+                },
+                "required": [
+                    "data",
+                    "pageSize"
+                ]
+            },
+            "AuthReqDto": {
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "examples": [
+                            "h4ngry1",
+                            "hunger"
+                        ]
+                    }
+                },
+                "required": [
+                    "username"
+                ]
+            },
+            "AuthRespDto": {
+                "type": "object",
+                "properties": {
+                    "accessToken": {
+                        "type": "string",
+                        "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInVzZXJuYW1lIjoiaDRuZ3J5MSIsImlhdCI6MTcwMDg5MzQ0MSwiZXhwIjoxNzUyNzMzNDQxfQ.EXDh5f1hUXcHKDV2Gcr3LZqUFKbDZqQOvQLtX9NB9xg"
+                    }
+                },
+                "required": [
+                    "accessToken"
+                ]
+            },
+            "AddToCartDto": {
+                "type": "object",
+                "properties": {
+                    "outletUuid": {
+                        "type": "string",
+                        "example": "6d851804-8cb6-11ee-af3a-8ffbcaf320e3"
+                    },
+                    "menuUuid": {
+                        "type": "string",
+                        "example": "5d851804-8cb6-11ee-af3a-8ffbcaf320e2"
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "minimum": 1,
+                        "example": 1
+                    }
+                },
+                "required": [
+                    "outletUuid",
+                    "menuUuid",
+                    "quantity"
+                ]
+            },
+            "SuccessRespDto": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "success"
+                    }
+                },
+                "required": [
+                    "message"
+                ]
+            },
+            "CartItemRespDto": {
+                "type": "object",
+                "properties": {
+                    "uuid": {
+                        "type": "string",
+                        "example": "a5b7f222-8b80-11ee-aa76-2f449b6951b6"
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "example": 12
+                    },
+                    "menuName": {
+                        "type": "string",
+                        "example": "Chicken Alfredo Pasta"
+                    },
+                    "menuImage": {
+                        "type": "string",
+                        "example": "chicken_alfredo.jpg"
+                    },
+                    "menuPrice": {
+                        "type": "number",
+                        "example": 30000
+                    },
+                    "updatedAt": {
+                        "format": "date-time",
+                        "type": "string"
+                    },
+                    "isMenuAvailable": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "uuid",
+                    "quantity",
+                    "menuName",
+                    "menuImage",
+                    "menuPrice",
+                    "updatedAt",
+                    "isMenuAvailable"
+                ]
+            },
+            "CartsRespDto": {
+                "type": "object",
+                "properties": {
+                    "uuid": {
+                        "type": "string",
+                        "example": "a5b7f222-8b80-11ee-aa76-2f449b6951b6"
+                    },
+                    "outletName": {
+                        "type": "string",
+                        "example": "Mataram Semarang"
+                    },
+                    "outletUuid": {
+                        "type": "string",
+                        "example": "f5b7f222-8b80-11ee-aa76-2f449b6951b6"
+                    },
+                    "updatedAt": {
+                        "format": "date-time",
+                        "type": "string"
+                    },
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CartItemRespDto"
+                        }
+                    }
+                },
+                "required": [
+                    "uuid",
+                    "outletName",
+                    "outletUuid",
+                    "updatedAt",
+                    "items"
+                ]
+            },
+            "CartsPaginationRespDto": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CartsRespDto"
+                        }
+                    },
+                    "page": {
+                        "type": "number"
+                    },
+                    "pageSize": {
+                        "type": "number"
+                    }
+                },
+                "required": [
+                    "data",
+                    "page",
+                    "pageSize"
+                ]
+            },
+            "UpdateCartItemDto": {
+                "type": "object",
+                "properties": {
+                    "quantity": {
+                        "type": "number",
+                        "minimum": 1,
+                        "example": 1
+                    }
+                },
+                "required": [
+                    "quantity"
+                ]
+            },
+            "OrderReqDto": {
+                "type": "object",
+                "properties": {
+                    "cartUuid": {
+                        "type": "string",
+                        "example": "a5b7f222-8b80-11ee-aa76-2f449b6951b6"
+                    }
+                },
+                "required": [
+                    "cartUuid"
+                ]
+            }
+        }
+    }
+}

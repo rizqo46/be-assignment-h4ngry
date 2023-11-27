@@ -32,7 +32,7 @@
     ```
 ## API Docs
 
-OpenAPI Swagger Docs is available after app startup on `http://localhost:PORT/api` or you can import from file.
+OpenAPI Swagger Docs is available after app startup on `http://localhost:PORT/api` or you can import from file [api-docs.json](docs/api-docs.json).
 
 ## ERD
 ![alt](db/erd.png)
