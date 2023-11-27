@@ -14,8 +14,9 @@ import {
 } from './dto/get.carts.dto';
 import { PaginationReqDtoV2 } from 'src/shared/dto/pagination.dto';
 import { OutletsRepo } from 'src/shared/repository/outlets.repo';
-import { AddToCartDto } from './dto/carts.dto';
+import { AddToCartDto, UpdateCartItemDto } from './dto/carts.dto';
 import { CartsRepo } from 'src/shared/repository/carts.repo';
+import { SuccessRespDto } from 'src/shared/dto/basic.dto';
 
 @Injectable()
 export class CartsService {
@@ -85,7 +86,7 @@ export class CartsService {
     );
   }
 
-  async validateCartItem(itemUuid: string, userId: number) {
+  async getAndValidateCartItem(itemUuid: string, userId: number) {
     const cartItem = await this.cartsRepo.getCartItemWithCart(
       this.db,
       itemUuid,
@@ -101,21 +102,38 @@ export class CartsService {
     return cartItem;
   }
 
-  async updateCartItem(data: Partial<CartItemModel>) {
+  async updateCartItem(
+    itemUuid: string,
+    reqBody: UpdateCartItemDto,
+    userId: number,
+  ) {
+    const cartItem = await this.getAndValidateCartItem(itemUuid, userId);
+
+    if (cartItem.quantity === reqBody.quantity) {
+      return new SuccessRespDto();
+    }
+
     return await this.db.transaction().execute(async (trx) => {
       await this.cartsRepo.updateCartItemQuantity(
         trx,
-        data.uuid,
-        data.quantity,
+        itemUuid,
+        cartItem.quantity,
       );
-      return await this.cartsRepo.updateCartMarkAsUpdated(trx, data.cart_id);
+      return await this.cartsRepo.updateCartMarkAsUpdated(
+        trx,
+        cartItem.cart_id,
+      );
     });
   }
 
-  async deleteCartItem(itemUuid: string, cartId: number) {
+  async deleteCartItem(itemUuid: string, userId: number) {
+    const cartItem = await this.getAndValidateCartItem(itemUuid, userId);
     return await this.db.transaction().execute(async (trx) => {
       await this.cartsRepo.deleteCartItem(trx, itemUuid);
-      return await this.cartsRepo.validateCartAfterRemoveItem(trx, cartId);
+      return await this.cartsRepo.validateCartAfterRemoveItem(
+        trx,
+        cartItem.cart_id,
+      );
     });
   }
 
@@ -137,5 +155,10 @@ export class CartsService {
       // Delete cart
       return await this.cartsRepo.deleteCart(trx, cartId);
     });
+  }
+
+  async deleteCart(uuid: string, userId: number) {
+    const cart = await this.getAndValidateCart(uuid, userId);
+    await this.deleteCartAndItsItems(cart.id);
   }
 }

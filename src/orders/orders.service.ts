@@ -3,7 +3,6 @@ import { Kysely, Transaction } from 'kysely';
 import { InsertObjectOrList } from 'kysely/dist/cjs/parser/insert-values-parser';
 import { InjectKysely } from 'nestjs-kysely';
 import { CartsService } from 'src/carts/carts.service';
-import { MenusService } from 'src/menus/menus.service';
 import { DB } from 'src/shared/models/d.db';
 import { OrderItemModel, OrderModel } from 'src/shared/models/orders.model';
 import { OrderReqDto } from './dto/orders.dto';

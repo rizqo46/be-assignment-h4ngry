@@ -101,21 +101,7 @@ export class CartsController {
     @Param('itemUuid', new ParseUUIDPipe()) itemUuid: string,
     @Body() reqBody: UpdateCartItemDto,
   ) {
-    const cartItem = await this.cartsService.validateCartItem(
-      itemUuid,
-      req['user'].sub,
-    );
-
-    if (cartItem.quantity === reqBody.quantity) {
-      return new SuccessRespDto();
-    }
-
-    await this.cartsService.updateCartItem({
-      cart_id: cartItem.cart_id,
-      quantity: reqBody.quantity,
-      uuid: itemUuid,
-    });
-
+    await this.cartsService.updateCartItem(itemUuid, reqBody, req['user'].sub);
     return new SuccessRespDto();
   }
 
@@ -126,11 +112,7 @@ export class CartsController {
     @Request() req: RequestExpress,
     @Param('itemUuid', new ParseUUIDPipe()) itemUuid: string,
   ) {
-    const cartItem = await this.cartsService.validateCartItem(
-      itemUuid,
-      req['user'].sub,
-    );
-    await this.cartsService.deleteCartItem(itemUuid, cartItem.cart_id);
+    await this.cartsService.deleteCartItem(itemUuid, req['user'].sub);
     return new SuccessRespDto();
   }
 
@@ -141,11 +123,7 @@ export class CartsController {
     @Request() req: RequestExpress,
     @Param('uuid', new ParseUUIDPipe()) uuid: string,
   ) {
-    const cart = await this.cartsService.getAndValidateCart(
-      uuid,
-      req['user'].sub,
-    );
-    await this.cartsService.deleteCartAndItsItems(cart.id);
+    await this.cartsService.deleteCart(uuid, req['user'].sub);
     return new SuccessRespDto();
   }
 }
