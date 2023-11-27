@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DB } from 'src/shared/models/d.db';
 import { Kysely, sql } from 'kysely';
 import {
@@ -119,17 +119,11 @@ export class CartsRepo {
   }
 
   async getCart(db: Kysely<DB>, cartUuid: string) {
-    const cart = await db
+    return await db
       .selectFrom('carts')
       .where('uuid', '=', cartUuid)
       .select(['id', 'user_id', 'outlet_id'])
       .executeTakeFirst();
-
-    if (!cart) {
-      throw new NotFoundException('cart is not found');
-    }
-
-    return cart;
   }
 
   async lockCart(trx: Kysely<DB>, cartId: number) {

@@ -17,7 +17,7 @@ import { CartsRepo } from 'src/shared/repository/carts.repo';
 import { SuccessRespDto } from 'src/shared/dto/basic.dto';
 import { MenusService } from 'src/menus/menus.service';
 import { OutletsService } from 'src/outlets/outlets.service';
-import { CartItemModel } from 'src/shared/models/carts.model';
+import { CartItemModel, CartModel } from 'src/shared/models/carts.model';
 
 @Injectable()
 export class CartsService {
@@ -154,14 +154,19 @@ export class CartsService {
     });
   }
 
-  async getAndValidateCart(cartUuid: string, userId: number) {
+  async getCart(cartUuid: string) {
     const cart = await this.cartsRepo.getCart(this.db, cartUuid);
-
-    if (cart.user_id != userId) {
-      throw new ForbiddenException('cart item is not belong to user');
+    if (!cart) {
+      throw new NotFoundException('cart is not found');
     }
 
     return cart;
+  }
+
+  validateCartBelonging(cart: Partial<CartModel>, userId: number) {
+    if (cart.user_id != userId) {
+      throw new ForbiddenException('cart item is not belong to user');
+    }
   }
 
   async deleteCartAndItsItems(cartId: number) {
@@ -175,7 +180,12 @@ export class CartsService {
   }
 
   async deleteCart(uuid: string, userId: number) {
-    const cart = await this.getAndValidateCart(uuid, userId);
+    // Validate is cart belong to user
+    const cart = await this.getCart(uuid);
+
+    // Validate is cart belong to user
+    this.validateCartBelonging(cart, userId);
+
     await this.deleteCartAndItsItems(cart.id);
   }
 }

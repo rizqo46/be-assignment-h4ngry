@@ -26,11 +26,11 @@ export class OrdersService {
     userId: number,
     reqBody: OrderReqDto,
   ): Promise<SuccessRespDto> {
-    // Validate the user's cart
-    const cart = await this.cartsService.getAndValidateCart(
-      reqBody.cartUuid,
-      userId,
-    );
+    // Get cart
+    const cart = await this.cartsService.getCart(reqBody.cartUuid);
+
+    // Validate is cart belong to user
+    this.cartsService.validateCartBelonging(cart, userId);
 
     // Retrieve the cart items
     const cartItems = await this.cartsRepo.getCartItems(this.db, cart.id);

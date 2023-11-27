@@ -13,11 +13,11 @@ export class UsersService {
   ) {}
 
   async findOne(username: string): Promise<Partial<UserModel>> {
-    let user =  await this.usersRepo.findOne(this.db, username);
+    const user = await this.usersRepo.findOne(this.db, username);
     if (!user) {
       throw new BadRequestException('user not found');
     }
-    
-    return user
+
+    return user;
   }
 }
