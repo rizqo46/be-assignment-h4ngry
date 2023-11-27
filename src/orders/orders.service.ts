@@ -11,14 +11,15 @@ import { CartItemModel } from 'src/shared/models/carts.model';
 import { MenuModel } from 'src/shared/models/menus.model';
 import { SuccessRespDto } from 'src/shared/dto/basic.dto';
 import { CartsRepo } from 'src/shared/repository/carts.repo';
+import { MenusRepo } from 'src/shared/repository/menus.repo';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectKysely() private readonly db: Kysely<DB>,
     private readonly cartsService: CartsService,
-    private readonly menuService: MenusService,
     private readonly cartsRepo: CartsRepo,
+    private readonly menusRepo: MenusRepo,
   ) {}
 
   async makeOrder(
@@ -38,7 +39,8 @@ export class OrdersService {
     const menuIds = cartItems.map((item) => item.menu_id);
 
     // Check the availability of the menu items
-    const availableMenus = await this.menuService.getOutletAvailableMenus(
+    const availableMenus = await this.menusRepo.getOutletAvailableMenus(
+      this.db,
       cart.id,
       menuIds,
     );
@@ -53,7 +55,7 @@ export class OrdersService {
     const isSomeMenusNotAvailable = menuIds.length !== availableMenuIds.length;
 
     // Retrieve the details of the available menus
-    const menus = await this.menuService.getMenus(availableMenuIds);
+    const menus = await this.menusRepo.getMenus(this.db, availableMenuIds);
 
     // Create the order items model
     const orderItems = this.createOrderItemsModel(filteredCartItems, menus);

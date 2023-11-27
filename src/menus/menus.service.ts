@@ -58,16 +58,4 @@ export class MenusService {
   async findOutletMenu(criteria: Partial<OutletMenuModel>) {
     return await this.menusRepo.findOutletMenu(this.db, criteria);
   }
-
-  async getOutletAvailableMenus(outletId: number, menusId: number[]) {
-    return await this.menusRepo.getOutletAvailableMenus(
-      this.db,
-      outletId,
-      menusId,
-    );
-  }
-
-  async getMenus(menusId: number[]) {
-    return await this.menusRepo.getMenus(this.db, menusId);
-  }
 }
