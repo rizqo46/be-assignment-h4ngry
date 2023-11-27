@@ -20,7 +20,7 @@ import { JWTGuard } from 'src/auth/auth.guard';
 import { Request as RequestExpress } from 'express';
 import { AddToCartDto, UpdateCartItemDto } from './dto/carts.dto';
 import { SuccessRespDto } from 'src/shared/dto/basic.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiNotFoundResponse, ApiTags } from '@nestjs/swagger';
 import { PaginationReqDtoV2 } from 'src/shared/dto/pagination.dto';
 
 const cartsControllerName = 'carts';
@@ -33,6 +33,8 @@ export class CartsController {
 
   @UseGuards(JWTGuard)
   @Post()
+  @ApiNotFoundResponse({description: "Outlet or Menu not found"})
+  @ApiBadRequestResponse({description: "Menu is not available in selected Outlet"})
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
   async addToCart(
@@ -58,6 +60,7 @@ export class CartsController {
 
   @UseGuards(JWTGuard)
   @Put('items/:itemUuid')
+  @ApiNotFoundResponse({description: "Cart Item not found"})
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateCartItem(
     @Request() req: RequestExpress,
@@ -71,6 +74,7 @@ export class CartsController {
 
   @UseGuards(JWTGuard)
   @Delete('items/:itemUuid')
+  @ApiNotFoundResponse({description: "Cart Item not found"})
   @UsePipes(new ValidationPipe({ transform: true }))
   async deleteCartItem(
     @Request() req: RequestExpress,
@@ -83,6 +87,7 @@ export class CartsController {
 
   @UseGuards(JWTGuard)
   @Delete(':uuid')
+  @ApiNotFoundResponse({description: "Cart not found"})
   @UsePipes(new ValidationPipe({ transform: true }))
   async deleteCart(
     @Request() req: RequestExpress,

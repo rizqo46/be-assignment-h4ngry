@@ -11,7 +11,7 @@ import { OrdersService } from './orders.service';
 import { JWTGuard } from 'src/auth/auth.guard';
 import { Request as RequestExpress } from 'express';
 import { OrderReqDto } from './dto/orders.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiNotFoundResponse, ApiTags } from '@nestjs/swagger';
 
 const ordersControllerName = 'orders';
 
@@ -23,6 +23,7 @@ export class OrdersController {
 
   @UseGuards(JWTGuard)
   @Post()
+  @ApiNotFoundResponse({description: "Cart not found"})
   @UsePipes(new ValidationPipe({ transform: true }))
   async createOrder(
     @Request() req: RequestExpress,
