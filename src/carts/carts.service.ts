@@ -25,7 +25,7 @@ import {
 export class CartsService {
   constructor(@InjectKysely() private readonly db: Kysely<DB>) {}
 
-  private async upsertCart(trx: Transaction<DB>, cartReq: Partial<CartModel>) {
+  private async upsertCart(trx: Kysely<DB>, cartReq: Partial<CartModel>) {
     let query = trx.insertInto('carts');
 
     // Define cart value
@@ -48,7 +48,7 @@ export class CartsService {
   }
 
   private async upsertCartItem(
-    trx: Transaction<DB>,
+    trx: Kysely<DB>,
     cartId: number,
     cartItemReq: Partial<CartItemModel>,
   ) {
@@ -135,7 +135,6 @@ export class CartsService {
     let query = this.db
       .selectFrom('carts')
       .leftJoin('outlets', 'carts.outlet_id', 'outlets.id')
-      .innerJoin("cart_items", "carts.id", "cart_items.cart_id")
       .select([
         'carts.id',
         'carts.uuid',
@@ -212,7 +211,7 @@ export class CartsService {
   }
 
   private async updateCartItemQuantity(
-    trx: Transaction<DB>,
+    trx: Kysely<DB>,
     uuid: string,
     quantity: number,
   ) {
@@ -225,7 +224,7 @@ export class CartsService {
       .executeTakeFirstOrThrow();
   }
 
-  private async updateCartMarkAsUpdated(trx: Transaction<DB>, cartId: number) {
+  private async updateCartMarkAsUpdated(trx: Kysely<DB>, cartId: number) {
     return await trx
       .updateTable('carts')
       .set({ updated_at: sql<Date>`NOW()` })
@@ -233,11 +232,29 @@ export class CartsService {
       .execute();
   }
 
-  async deleteCartItem(itemUuid: string) {
-    return await this.db
+  async deleteCartItem(itemUuid: string, cartId: number) {
+    return await this.db.transaction().execute(async (trx) => {
+      await this.deleteCartItemFromDB(trx, itemUuid)
+      return await this.validateCartAfterRemoveItem(trx, cartId)
+    })
+  }
+
+  private async deleteCartItemFromDB(trx: Kysely<DB>, itemUuid: string) {
+    return await trx
       .deleteFrom('cart_items')
       .where('uuid', '=', itemUuid)
       .executeTakeFirst();
+  }
+
+  private async validateCartAfterRemoveItem(trx: Kysely<DB>, cartId: number) {
+    // This function is validate cart after remove an item from cart
+    // if cart is empty then delete the cart
+    let cartItems = await this.getCartItems(trx, cartId, 1)
+    if (cartItems.length > 0) {
+      return
+    }
+
+    return await this.deleteCart(trx, cartId)
   }
 
   async getCart(cartUuid: string) {
@@ -274,18 +291,22 @@ export class CartsService {
     });
   }
 
-  async getCartItems(cartId: number) {
-    let query = this.db
+  async getCartItems(dB: Kysely<DB>, cartId: number, limit?: number) {
+    let query = dB
       .selectFrom('cart_items')
       .select(['menu_id', 'quantity'])
       .orderBy('cart_items.menu_id asc');
+
+    if (limit) {
+      query = query.limit(limit)
+    }
 
     query = query.where('cart_id', '=', cartId);
 
     return await query.execute();
   }
 
-  async lockCart(trx: Transaction<DB>, cartId: number) {
+  async lockCart(trx: Kysely<DB>, cartId: number) {
     return trx
       .selectFrom('carts')
       .select('uuid')
@@ -294,7 +315,7 @@ export class CartsService {
       .executeTakeFirstOrThrow();
   }
 
-  async lockCartItems(trx: Transaction<DB>, cartId: number) {
+  async lockCartItems(trx: Kysely<DB>, cartId: number) {
     return trx
       .selectFrom('cart_items')
       .select('uuid')
@@ -303,14 +324,14 @@ export class CartsService {
       .executeTakeFirstOrThrow();
   }
 
-  async deleteCartItems(trx: Transaction<DB>, cartId: number) {
+  async deleteCartItems(trx: Kysely<DB>, cartId: number) {
     return trx
       .deleteFrom('cart_items')
       .where('cart_id', '=', cartId)
       .executeTakeFirstOrThrow();
   }
 
-  async deleteCart(trx: Transaction<DB>, cartId: number) {
+  async deleteCart(trx: Kysely<DB>, cartId: number) {
     return trx
       .deleteFrom('carts')
       .where('id', '=', cartId)

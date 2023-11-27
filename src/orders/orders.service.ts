@@ -27,7 +27,7 @@ export class OrdersService {
     const cart = await this.cartsService.validateCart(reqBody.cartUuid, userId);
 
     // Retrieve the cart items
-    const cartItems = await this.cartsService.getCartItems(cart.id);
+    const cartItems = await this.cartsService.getCartItems(this.db, cart.id);
 
     // Get the IDs of the menu items in the cart
     const menuIds = cartItems.map((item) => item.menu_id);

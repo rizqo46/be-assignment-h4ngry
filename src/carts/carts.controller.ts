@@ -128,8 +128,8 @@ export class CartsController {
     @Request() req: RequestExpress,
     @Param('itemUuid', new ParseUUIDPipe()) itemUuid: string,
   ) {
-    await this.cartsService.validateCartItem(itemUuid, req['user'].sub);
-    await this.cartsService.deleteCartItem(itemUuid);
+    let cartItem = await this.cartsService.validateCartItem(itemUuid, req['user'].sub);
+    await this.cartsService.deleteCartItem(itemUuid, cartItem.cart_id);
     return new SuccessRespDto();
   }
 
