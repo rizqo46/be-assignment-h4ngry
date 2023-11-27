@@ -40,16 +40,6 @@ export class CartsController {
   ) { }
 
   @UseGuards(JWTGuard)
-  @Get()
-  @HttpCode(HttpStatus.OK)
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async getAll(
-    @Request() req: RequestExpress, @Query() reqQuery: PaginationReqDtoV2,
-  ) {
-    return await this.cartsService.getUserCartsWithItems(req['user'].sub, reqQuery);
-  }
-
-  @UseGuards(JWTGuard)
   @Post()
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -89,6 +79,16 @@ export class CartsController {
     return new SuccessRespDto();
   }
 
+  @UseGuards(JWTGuard)
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getAll(
+    @Request() req: RequestExpress, @Query() reqQuery: PaginationReqDtoV2,
+  ) {
+    return await this.cartsService.getUserCartsWithItems(req['user'].sub, reqQuery);
+  }
+  
   @UseGuards(JWTGuard)
   @Put('items/:itemUuid')
   @UsePipes(new ValidationPipe({ transform: true }))
