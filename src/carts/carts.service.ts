@@ -28,7 +28,7 @@ export class CartsService {
     private readonly outletsService: OutletsService,
   ) {}
 
-  async addCartItemV2(reqBody: AddToCartDto, userId: number) {
+  async addCartItem(reqBody: AddToCartDto, userId: number) {
     // get outlet
     const outlet = await this.outletsService.findOne(reqBody.outletUuid);
 

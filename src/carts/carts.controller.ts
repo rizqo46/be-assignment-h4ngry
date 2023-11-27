@@ -42,7 +42,7 @@ export class CartsController {
     @Body() reqBody: AddToCartDto,
   ) {
     const userId = req['user'].sub;
-    await this.cartsService.addCartItemV2(reqBody, userId);
+    await this.cartsService.addCartItem(reqBody, userId);
     return new SuccessRespDto();
   }
 
