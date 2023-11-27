@@ -11,7 +11,6 @@ const menusControllerName = 'menus';
 export class MenusController {
   constructor(
     private readonly menusService: MenusService,
-    private readonly outletsService: OutletsService,
   ) {}
 
   @Get('outlets/:uuid')
