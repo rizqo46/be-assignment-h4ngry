@@ -16,7 +16,7 @@ import { PaginationReqDto, PaginationReqDtoV2 } from 'src/shared/dto/pagination.
 
 @Injectable()
 export class CartsService {
-  constructor(@InjectKysely() private readonly db: Kysely<DB>) {}
+  constructor(@InjectKysely() private readonly db: Kysely<DB>) { }
 
   addCartItem(
     cartReq: Partial<CartModel>,
@@ -103,7 +103,7 @@ export class CartsService {
     paginationReq.pageSize = paginationReq.pageSize || 2
     const page = paginationReq.page
     const pageSize = paginationReq.pageSize
-    const offset = (page-1) * pageSize 
+    const offset = (page - 1) * pageSize
 
     let query = this.db
       .selectFrom('carts')
@@ -115,7 +115,7 @@ export class CartsService {
         'outlets.name as outlet_name',
         'outlets.uuid as outlet_uuid',
       ]);
-    
+
     query = query.offset(offset).limit(pageSize)
 
     query = query.where('carts.user_id', '=', userId);
@@ -225,19 +225,13 @@ export class CartsService {
     return cart;
   }
 
-  async deleteCartAndItsItems(id: number) {
+  async deleteCartAndItsItems(cartId: number) {
     return await this.db.transaction().execute(async (trx) => {
       //  Delete cart item first, since its depend on cart
-      await trx
-        .deleteFrom('cart_items')
-        .where('cart_items.cart_id', '=', id)
-        .executeTakeFirstOrThrow();
-
+      await this.deleteCartItems(trx, cartId)
+      
       // Delete cart
-      return await trx
-        .deleteFrom('carts')
-        .where('id', '=', id)
-        .executeTakeFirstOrThrow();
+      return await this.deleteCart(trx, cartId)
     });
   }
 
