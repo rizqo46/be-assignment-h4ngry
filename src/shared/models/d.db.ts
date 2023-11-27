@@ -10,6 +10,8 @@ export type Int8 = ColumnType<
   bigint | number | string
 >;
 
+export type OrderStatus = 'finished' | 'in_progress';
+
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export interface CartItems {
@@ -38,6 +40,27 @@ export interface Menus {
   name: string;
   price: number;
   src_doc: Generated<string>;
+  uuid: Generated<string>;
+}
+
+export interface OrderItems {
+  created_at: Generated<Timestamp>;
+  menu_id: number;
+  order_id: number;
+  quantity: number;
+  sub_total: number;
+  updated_at: Generated<Timestamp>;
+  uuid: Generated<string>;
+}
+
+export interface Orders {
+  created_at: Generated<Timestamp>;
+  id: Generated<number>;
+  outlet_id: number;
+  status: Generated<OrderStatus>;
+  total: number;
+  updated_at: Generated<Timestamp>;
+  user_id: number;
   uuid: Generated<string>;
 }
 
@@ -75,6 +98,8 @@ export interface DB {
   cart_items: CartItems;
   carts: Carts;
   menus: Menus;
+  order_items: OrderItems;
+  orders: Orders;
   outlets: Outlets;
   outlets_menus: OutletsMenus;
   schema_migrations: SchemaMigrations;

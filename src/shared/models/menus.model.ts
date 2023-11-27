@@ -26,6 +26,7 @@ export class MenuModel {
   is_available: boolean;
   description: string;
   image: string;
+  price: number;
   name: string;
   uuid: string;
   created_at: Date;

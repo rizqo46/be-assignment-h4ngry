@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/shared/models/d.db';
-import { Kysely, sql } from 'kysely';
+import { Kysely, Transaction, sql } from 'kysely';
 import {
   CartItemModel,
   CartModel,
@@ -15,7 +15,7 @@ import { CartItemRespDto, CartsRespDto } from './dto/get.carts.dto';
 
 @Injectable()
 export class CartsService {
-  constructor(@InjectKysely() private readonly db: Kysely<DB>) { }
+  constructor(@InjectKysely() private readonly db: Kysely<DB>) {}
 
   addCartItem(
     cartReq: Partial<CartModel>,
@@ -216,7 +216,7 @@ export class CartsService {
     return cart;
   }
 
-  async deleteCart(id: number) {
+  async deleteCartAndItsItems(id: number) {
     return await this.db.transaction().execute(async (trx) => {
       //  Delete cart item first, since its depend on cart
       await trx
@@ -233,12 +233,45 @@ export class CartsService {
   }
 
   async getCartItems(cartId: number) {
-    let query = this.db.selectFrom("cart_items").
-      select(["menu_id", "quantity"]).
-      orderBy("cart_items.menu_id asc")
+    let query = this.db
+      .selectFrom('cart_items')
+      .select(['menu_id', 'quantity'])
+      .orderBy('cart_items.menu_id asc');
 
-    query = query.where("cart_id", "=", cartId)
+    query = query.where('cart_id', '=', cartId);
 
-    return await query.execute()
+    return await query.execute();
+  }
+
+  async lockCart(trx: Transaction<DB>, cartId: number) {
+    return trx
+      .selectFrom('carts')
+      .select('uuid')
+      .where('id', '=', cartId)
+      .forUpdate()
+      .executeTakeFirstOrThrow();
+  }
+
+  async lockCartItems(trx: Transaction<DB>, cartId: number) {
+    return trx
+      .selectFrom('cart_items')
+      .select('uuid')
+      .where('cart_id', '=', cartId)
+      .forUpdate()
+      .executeTakeFirstOrThrow();
+  }
+
+  async deleteCartItems(trx: Transaction<DB>, cartId: number) {
+    return trx
+      .deleteFrom('cart_items')
+      .where('cart_id', '=', cartId)
+      .executeTakeFirstOrThrow();
+  }
+
+  async deleteCart(trx: Transaction<DB>, cartId: number) {
+    return trx
+      .deleteFrom('carts')
+      .where('id', '=', cartId)
+      .executeTakeFirstOrThrow();
   }
 }
