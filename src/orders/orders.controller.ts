@@ -28,7 +28,7 @@ export class OrdersController {
     @Request() req: RequestExpress,
     @Body() reqBody: OrderReqDto,
   ) {
-    const userId = req["user"].sub
+    const userId = req['user'].sub;
     return this.ordersService.makeOrder(userId, reqBody);
   }
 }

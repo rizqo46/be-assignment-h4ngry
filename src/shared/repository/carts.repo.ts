@@ -32,17 +32,13 @@ export class CartsRepo {
     return await query.returning(['id', 'uuid']).executeTakeFirstOrThrow();
   }
 
-  async upsertCartItem(
-    trx: Kysely<DB>,
-    cartId: number,
-    cartItemReq: Partial<CartItemModel>,
-  ) {
+  async upsertCartItem(trx: Kysely<DB>, cartItemReq: Partial<CartItemModel>) {
     // Define query to insert cart item
     let query = trx.insertInto('cart_items');
 
     // Define cart item value
     query = query.values({
-      cart_id: cartId,
+      cart_id: cartItemReq.cart_id,
       menu_id: cartItemReq.menu_id,
       quantity: cartItemReq.quantity,
     });

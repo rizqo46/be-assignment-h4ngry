@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -13,40 +12,34 @@ import {
   CartsRespDto,
 } from './dto/get.carts.dto';
 import { PaginationReqDtoV2 } from 'src/shared/dto/pagination.dto';
-import { OutletsRepo } from 'src/shared/repository/outlets.repo';
 import { AddToCartDto, UpdateCartItemDto } from './dto/carts.dto';
 import { CartsRepo } from 'src/shared/repository/carts.repo';
 import { SuccessRespDto } from 'src/shared/dto/basic.dto';
-import { MenusRepo } from 'src/shared/repository/menus.repo';
+import { MenusService } from 'src/menus/menus.service';
+import { OutletsService } from 'src/outlets/outlets.service';
+import { CartItemModel } from 'src/shared/models/carts.model';
 
 @Injectable()
 export class CartsService {
   constructor(
     @InjectKysely() private readonly db: Kysely<DB>,
-    private readonly outletsRepo: OutletsRepo,
     private readonly cartsRepo: CartsRepo,
-    private readonly menusRepo: MenusRepo,
+    private readonly menusService: MenusService,
+    private readonly outletsService: OutletsService,
   ) {}
 
   async addCartItemV2(reqBody: AddToCartDto, userId: number) {
-    const outlet = await this.outletsRepo.findOne(this.db, reqBody.outletUuid);
-    if (!outlet) {
-      throw new NotFoundException('outlet not found');
-    }
-    const menu = await this.menusRepo.findOne(this.db, {
-      uuid: reqBody.menuUuid,
-    });
-    if (!menu) {
-      throw new NotFoundException('menu not found');
-    }
+    // get outlet
+    const outlet = await this.outletsService.findOne(reqBody.outletUuid);
 
-    const outletMenu = await this.menusRepo.findOutletMenu(this.db, {
+    // get menu
+    const menu = await this.menusService.findOne({ uuid: reqBody.menuUuid });
+
+    // check/validate menu availability
+    await this.menusService.checkOutletMenuAvailability({
       menu_id: menu.id,
       outlet_id: outlet.id,
     });
-    if (!outletMenu.is_available) {
-      throw new BadRequestException('menu is not available in selected outlet');
-    }
 
     return await this.db.transaction().execute(async (trx) => {
       // Upsert cart
@@ -56,9 +49,10 @@ export class CartsService {
       });
 
       // Upsert cart item
-      return await this.cartsRepo.upsertCartItem(trx, cart.id, {
+      return await this.cartsRepo.upsertCartItem(trx, {
         menu_id: menu.id,
         quantity: reqBody.quantity,
+        cart_id: cart.id,
       });
     });
   }
@@ -103,7 +97,7 @@ export class CartsService {
     );
   }
 
-  async getAndValidateCartItem(itemUuid: string, userId: number) {
+  async getCartItem(itemUuid: string) {
     const cartItem = await this.cartsRepo.getCartItemWithCart(
       this.db,
       itemUuid,
@@ -112,11 +106,13 @@ export class CartsService {
       throw new NotFoundException('cart item is not found');
     }
 
+    return cartItem;
+  }
+
+  validateCartItemBelonging(cartItem: Partial<CartItemModel>, userId: number) {
     if (cartItem.user_id != userId) {
       throw new ForbiddenException('cart item is not belong to user');
     }
-
-    return cartItem;
   }
 
   async updateCartItem(
@@ -124,7 +120,9 @@ export class CartsService {
     reqBody: UpdateCartItemDto,
     userId: number,
   ) {
-    const cartItem = await this.getAndValidateCartItem(itemUuid, userId);
+    const cartItem = await this.getCartItem(itemUuid);
+
+    this.validateCartItemBelonging(cartItem, userId);
 
     if (cartItem.quantity === reqBody.quantity) {
       return new SuccessRespDto();
@@ -144,7 +142,9 @@ export class CartsService {
   }
 
   async deleteCartItem(itemUuid: string, userId: number) {
-    const cartItem = await this.getAndValidateCartItem(itemUuid, userId);
+    const cartItem = await this.getCartItem(itemUuid);
+    this.validateCartItemBelonging(cartItem, userId);
+
     return await this.db.transaction().execute(async (trx) => {
       await this.cartsRepo.deleteCartItem(trx, itemUuid);
       return await this.cartsRepo.validateCartAfterRemoveItem(

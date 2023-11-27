@@ -49,3 +49,11 @@ export class PaginationRespDtoV2<T> {
   @IsArray()
   data: T[];
 }
+
+export function getPaginationNextCursor(
+  data: Partial<{ id: number }>[],
+  pageSize: number,
+): number {
+  const n = data.length;
+  return n != 0 && n == pageSize ? data[n - 1].id : null;
+}

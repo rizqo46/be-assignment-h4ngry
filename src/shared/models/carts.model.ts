@@ -36,6 +36,7 @@ export class CartItemModel {
   cart_id: number;
   created_at: Date;
   menu_id: number;
+  user_id: number;
   quantity: number;
   updated_at: Date;
   uuid: string;

@@ -1,5 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { PaginationReqDto } from 'src/shared/dto/pagination.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  PaginationReqDto,
+  getPaginationNextCursor,
+} from 'src/shared/dto/pagination.dto';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/shared/models/d.db';
 import { Kysely } from 'kysely';
@@ -23,11 +26,7 @@ export class OutletsService {
     req: PaginationReqDto,
     outlets: Partial<OutletModel>[],
   ): Promise<OutletRespDto> {
-    const nextCursor =
-      outlets.length != 0 && outlets.length == req.pageSize
-        ? outlets[outlets.length - 1].id
-        : null;
-
+    const nextCursor = getPaginationNextCursor(outlets, req.pageSize);
     const outletsDto: OutletDto[] = [];
     outlets.forEach((element) => {
       outletsDto.push(new OutletDto(element));
@@ -37,6 +36,11 @@ export class OutletsService {
   }
 
   async findOne(uuid: string) {
-    return await this.outletsRepo.findOne(this.db, uuid);
+    const outlet = await this.outletsRepo.findOne(this.db, uuid);
+    if (!outlet) {
+      throw new NotFoundException('outlet not found');
+    }
+
+    return outlet;
   }
 }

@@ -1,30 +1,34 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/shared/models/d.db';
 import { Kysely } from 'kysely';
-import { PaginationReqDto } from 'src/shared/dto/pagination.dto';
+import {
+  PaginationReqDto,
+  getPaginationNextCursor,
+} from 'src/shared/dto/pagination.dto';
 import {
   MenuModel,
   OutletAndMenuModel,
   OutletMenuModel,
 } from 'src/shared/models/menus.model';
 import { OutletMenuDto, OutletMenuRespDto } from './dto/menus.dto';
-import { OutletsRepo } from 'src/shared/repository/outlets.repo';
 import { MenusRepo } from 'src/shared/repository/menus.repo';
+import { OutletsService } from 'src/outlets/outlets.service';
 
 @Injectable()
 export class MenusService {
   constructor(
     @InjectKysely() private readonly db: Kysely<DB>,
-    private readonly outletsRepo: OutletsRepo,
     private readonly menusRepo: MenusRepo,
+    private readonly outletsService: OutletsService,
   ) {}
 
   async findOutletMenus(outletUuid: string, req: PaginationReqDto) {
-    const outlet = await this.outletsRepo.findOne(this.db, outletUuid);
-    if (!outlet) {
-      throw new NotFoundException("outlet isn't found");
-    }
+    const outlet = await this.outletsService.findOne(outletUuid);
 
     const outletMenus = await this.menusRepo.findOutletMenus(
       this.db,
@@ -39,10 +43,7 @@ export class MenusService {
     req: PaginationReqDto,
     outletMenus: Partial<OutletAndMenuModel[]>,
   ): Promise<OutletMenuRespDto> {
-    const nextCursor =
-      outletMenus.length != 0 && outletMenus.length == req.pageSize
-        ? outletMenus[outletMenus.length - 1].id
-        : null;
+    const nextCursor = getPaginationNextCursor(outletMenus, req.pageSize);
 
     const outletMenusDto: OutletMenuDto[] = [];
     outletMenus.forEach((element) => {
@@ -51,11 +52,24 @@ export class MenusService {
 
     return new OutletMenuRespDto(outletMenusDto, nextCursor, req.pageSize);
   }
-  async findOne(criteria: Partial<MenuModel>): Promise<Partial<MenuModel>> {
-    return await this.menusRepo.findOne(this.db, criteria);
+
+  // need to remove
+  async findOne(criteria: Partial<MenuModel>) {
+    const menu = await this.menusRepo.findOne(this.db, {
+      uuid: criteria.uuid,
+    });
+
+    if (!menu) {
+      throw new NotFoundException('menu not found');
+    }
+    return menu;
   }
 
-  async findOutletMenu(criteria: Partial<OutletMenuModel>) {
-    return await this.menusRepo.findOutletMenu(this.db, criteria);
+  // need to remove
+  async checkOutletMenuAvailability(criteria: Partial<OutletMenuModel>) {
+    const outletMenu = await this.menusRepo.findOutletMenu(this.db, criteria);
+    if (!outletMenu.is_available) {
+      throw new BadRequestException('menu is not available in selected outlet');
+    }
   }
 }
