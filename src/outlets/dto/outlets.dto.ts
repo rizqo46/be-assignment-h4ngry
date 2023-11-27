@@ -12,19 +12,19 @@ export class OutletDto {
     this.longitude = outletModel.longitude;
   }
 
-  @ApiProperty({example: "Jl. Majapahit No.462 A, Pedurungan Tengah"})
+  @ApiProperty({ example: 'Jl. Majapahit No.462 A, Pedurungan Tengah' })
   address: string;
 
-  @ApiProperty({example: -7.007683397188739})
+  @ApiProperty({ example: -7.007683397188739 })
   latitude: number;
 
-  @ApiProperty({example: 110.47388333909132})
+  @ApiProperty({ example: 110.47388333909132 })
   longitude: number;
 
-  @ApiProperty({example: "Mataram"})
+  @ApiProperty({ example: 'Mataram' })
   name: string;
 
-  @ApiProperty({example: "5d851804-8cb6-11ee-af3a-8ffbcaf320e2"})
+  @ApiProperty({ example: '5d851804-8cb6-11ee-af3a-8ffbcaf320e2' })
   uuid: string;
 }
 

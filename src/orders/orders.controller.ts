@@ -13,7 +13,7 @@ import { Request as RequestExpress } from 'express';
 import { OrderReqDto } from './dto/orders.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
-const ordersControllerName = 'orders'
+const ordersControllerName = 'orders';
 
 @ApiBearerAuth()
 @ApiTags(ordersControllerName)

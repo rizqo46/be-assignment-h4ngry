@@ -22,12 +22,14 @@ import { JWTGuard } from 'src/auth/auth.guard';
 import { Request as RequestExpress } from 'express';
 import { OutletsService } from 'src/outlets/outlets.service';
 import { MenusService } from 'src/menus/menus.service';
-import { AddToCartDto, UpdateCartDto } from './dto/carts.dto';
+import { AddToCartDto, UpdateCartItemDto } from './dto/carts.dto';
 import { SuccessRespDto } from 'src/shared/dto/basic.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { PaginationReqDto, PaginationReqDtoV2 } from 'src/shared/dto/pagination.dto';
+import {
+  PaginationReqDtoV2,
+} from 'src/shared/dto/pagination.dto';
 
-const cartsControllerName = 'carts'
+const cartsControllerName = 'carts';
 
 @ApiBearerAuth()
 @ApiTags(cartsControllerName)
@@ -37,7 +39,7 @@ export class CartsController {
     private readonly cartsService: CartsService,
     private readonly outletService: OutletsService,
     private readonly menuService: MenusService,
-  ) { }
+  ) {}
 
   @UseGuards(JWTGuard)
   @Post()
@@ -84,18 +86,22 @@ export class CartsController {
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
   async getAll(
-    @Request() req: RequestExpress, @Query() reqQuery: PaginationReqDtoV2,
+    @Request() req: RequestExpress,
+    @Query() reqQuery: PaginationReqDtoV2,
   ) {
-    return await this.cartsService.getUserCartsWithItems(req['user'].sub, reqQuery);
+    return await this.cartsService.getUserCartsWithItems(
+      req['user'].sub,
+      reqQuery,
+    );
   }
-  
+
   @UseGuards(JWTGuard)
   @Put('items/:itemUuid')
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateCartItem(
     @Request() req: RequestExpress,
     @Param('itemUuid', new ParseUUIDPipe()) itemUuid: string,
-    @Body() reqBody: UpdateCartDto,
+    @Body() reqBody: UpdateCartItemDto,
   ) {
     const cartItem = await this.cartsService.validateCartItem(
       itemUuid,

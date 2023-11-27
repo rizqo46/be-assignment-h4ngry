@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class SuccessRespDto {
   constructor(message?: string) {
@@ -10,6 +10,6 @@ export class SuccessRespDto {
     this.message = 'success';
   }
 
-  @ApiProperty({example: "success"})
+  @ApiProperty({ example: 'success' })
   message: string;
 }

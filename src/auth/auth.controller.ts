@@ -11,8 +11,7 @@ import { UsersService } from 'src/users/users.service';
 import { AuthService } from './auth.service';
 import { ApiTags } from '@nestjs/swagger';
 
-
-const authControllerName = 'auth'
+const authControllerName = 'auth';
 
 @ApiTags(authControllerName)
 @Controller(authControllerName)

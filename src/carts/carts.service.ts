@@ -11,68 +11,88 @@ import {
   CartModel,
   CartWithOutletModel,
 } from 'src/shared/models/carts.model';
-import { CartItemRespDto, CartsPaginationRespDto, CartsRespDto } from './dto/get.carts.dto';
-import { PaginationReqDto, PaginationReqDtoV2 } from 'src/shared/dto/pagination.dto';
+import {
+  CartItemRespDto,
+  CartsPaginationRespDto,
+  CartsRespDto,
+} from './dto/get.carts.dto';
+import {
+  PaginationReqDto,
+  PaginationReqDtoV2,
+} from 'src/shared/dto/pagination.dto';
 
 @Injectable()
 export class CartsService {
-  constructor(@InjectKysely() private readonly db: Kysely<DB>) { }
+  constructor(@InjectKysely() private readonly db: Kysely<DB>) {}
 
-  addCartItem(
+  private async upsertCart(trx: Transaction<DB>, cartReq: Partial<CartModel>) {
+    let query = trx.insertInto('carts');
+
+    // Define cart value
+    query = query.values({
+      outlet_id: cartReq.outlet_id,
+      user_id: cartReq.user_id,
+    });
+
+    // Handle on conflict insert cart
+    query = query.onConflict((onConflict) => {
+      return onConflict
+        .column('outlet_id')
+        .column('user_id')
+        .doUpdateSet({
+          updated_at: (eb) => eb.ref('excluded.updated_at'),
+        });
+    });
+
+    return await query.returning(['id', 'uuid']).executeTakeFirstOrThrow();
+  }
+
+  private async upsertCartItem(
+    trx: Transaction<DB>,
+    cartId: number,
+    cartItemReq: Partial<CartItemModel>,
+  ) {
+    // Define query to insert cart item
+    let query = trx.insertInto('cart_items');
+
+    // Define cart item value
+    query = query.values({
+      cart_id: cartId,
+      menu_id: cartItemReq.menu_id,
+      quantity: cartItemReq.quantity,
+    });
+
+    // Handle on conflict insert cart
+    query = query.onConflict((onConflict) => {
+      return onConflict
+        .column('cart_id')
+        .column('menu_id')
+        .doUpdateSet({
+          // On conflict do update to add quantity
+          quantity: sql<number>`cart_items.quantity + ${cartItemReq.quantity}`,
+        });
+    });
+
+    return await query.execute();
+  }
+
+  async addCartItem(
     cartReq: Partial<CartModel>,
     cartItemReq: Partial<CartItemModel>,
   ) {
-    return this.db.transaction().execute(async (trx) => {
-      // Define query to insert cart
-      let qInsertCart = trx.insertInto('carts');
+    return await this.db.transaction().execute(async (trx) => {
+      // Upsert cart
+      const cart = await this.upsertCart(trx, cartReq);
 
-      // Define cart value
-      qInsertCart = qInsertCart.values({
-        outlet_id: cartReq.outlet_id,
-        user_id: cartReq.user_id,
-      });
-
-      // Handle on conflict insert cart
-      qInsertCart = qInsertCart.onConflict((onConflict) => {
-        return onConflict
-          .column('outlet_id')
-          .column('user_id')
-          .doUpdateSet({
-            updated_at: (eb) => eb.ref('excluded.updated_at'),
-          });
-      });
-
-      // Get inserted cart
-      const cart = await qInsertCart
-        .returning(['id', 'uuid'])
-        .executeTakeFirstOrThrow();
-
-      // Define query to insert cart item
-      let qInsertCartItem = trx.insertInto('cart_items');
-
-      // Define cart item value
-      qInsertCartItem = qInsertCartItem.values({
-        cart_id: cart.id,
-        menu_id: cartItemReq.menu_id,
-        quantity: cartItemReq.quantity,
-      });
-
-      // Handle on conflict insert cart
-      qInsertCartItem = qInsertCartItem.onConflict((onConflict) => {
-        return onConflict
-          .column('cart_id')
-          .column('menu_id')
-          .doUpdateSet({
-            // On conflict do update to add quantity
-            quantity: sql<number>`cart_items.quantity + ${cartItemReq.quantity}`,
-          });
-      });
-
-      return await qInsertCartItem.execute();
+      // Upsert cart item
+      return await this.upsertCartItem(trx, cart.id, cartItemReq);
     });
   }
 
-  async getUserCartsWithItems(userId: number, paginationReq: PaginationReqDtoV2) {
+  async getUserCartsWithItems(
+    userId: number,
+    paginationReq: PaginationReqDtoV2,
+  ) {
     // Get carts
     const carts = await this.getUserCartsWithOutlet(userId, paginationReq);
 
@@ -95,15 +115,22 @@ export class CartsService {
       cartsResp.push(new CartsRespDto(cart, cartItemsResp));
     }
 
-    return new CartsPaginationRespDto(cartsResp, paginationReq.page, paginationReq.pageSize)
+    return new CartsPaginationRespDto(
+      cartsResp,
+      paginationReq.page,
+      paginationReq.pageSize,
+    );
   }
 
-  private async getUserCartsWithOutlet(userId: number, paginationReq: PaginationReqDtoV2) {
-    paginationReq.page = paginationReq.page || 1
-    paginationReq.pageSize = paginationReq.pageSize || 2
-    const page = paginationReq.page
-    const pageSize = paginationReq.pageSize
-    const offset = (page - 1) * pageSize
+  private async getUserCartsWithOutlet(
+    userId: number,
+    paginationReq: PaginationReqDtoV2,
+  ) {
+    paginationReq.page = paginationReq.page || 1;
+    paginationReq.pageSize = paginationReq.pageSize || 2;
+    const page = paginationReq.page;
+    const pageSize = paginationReq.pageSize;
+    const offset = (page - 1) * pageSize;
 
     let query = this.db
       .selectFrom('carts')
@@ -116,7 +143,7 @@ export class CartsService {
         'outlets.uuid as outlet_uuid',
       ]);
 
-    query = query.offset(offset).limit(pageSize)
+    query = query.offset(offset).limit(pageSize);
 
     query = query.where('carts.user_id', '=', userId);
 
@@ -178,20 +205,31 @@ export class CartsService {
 
   async updateCartItem(data: Partial<CartItemModel>) {
     return await this.db.transaction().execute(async (trx) => {
-      await trx
-        .updateTable('cart_items')
-        .set({
-          quantity: data.quantity,
-        })
-        .where('cart_items.uuid', '=', data.uuid)
-        .executeTakeFirstOrThrow();
-
-      return await trx
-        .updateTable('carts')
-        .set({ updated_at: sql<Date>`NOW()` })
-        .where('carts.id', '=', data.cart_id)
-        .execute();
+      await this.updateCartItemQuantity(trx, data.uuid, data.quantity);
+      return await this.updateCartMarkAsUpdated(trx, data.cart_id);
     });
+  }
+
+  private async updateCartItemQuantity(
+    trx: Transaction<DB>,
+    uuid: string,
+    quantity: number,
+  ) {
+    return await trx
+      .updateTable('cart_items')
+      .set({
+        quantity: quantity,
+      })
+      .where('cart_items.uuid', '=', uuid)
+      .executeTakeFirstOrThrow();
+  }
+
+  private async updateCartMarkAsUpdated(trx: Transaction<DB>, cartId: number) {
+    return await trx
+      .updateTable('carts')
+      .set({ updated_at: sql<Date>`NOW()` })
+      .where('carts.id', '=', cartId)
+      .execute();
   }
 
   async deleteCartItem(itemUuid: string) {
@@ -228,10 +266,10 @@ export class CartsService {
   async deleteCartAndItsItems(cartId: number) {
     return await this.db.transaction().execute(async (trx) => {
       //  Delete cart item first, since its depend on cart
-      await this.deleteCartItems(trx, cartId)
-      
+      await this.deleteCartItems(trx, cartId);
+
       // Delete cart
-      return await this.deleteCart(trx, cartId)
+      return await this.deleteCart(trx, cartId);
     });
   }
 

@@ -5,7 +5,7 @@ import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { PaginationReqDto } from 'src/shared/dto/pagination.dto';
 import { ApiTags } from '@nestjs/swagger';
 
-const outletsControllerName = "outlets"
+const outletsControllerName = 'outlets';
 
 @ApiTags(outletsControllerName)
 @Controller(outletsControllerName)
