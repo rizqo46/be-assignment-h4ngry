@@ -27,14 +27,6 @@ export class MenusController {
     @Param('uuid', new ParseUUIDPipe()) outletUuid: string,
     @Query() req: PaginationReqDto,
   ) {
-    const outlet = await this.outletsService.findOne(outletUuid);
-
-    if (!outlet) {
-      throw new NotFoundException("outlet isn't found");
-    }
-
-    const outletMenus = await this.menusService.findOutletMenus(outlet.id, req);
-
-    return this.menusService.parseFindAllResponse(req, outletMenus);
+    return await this.menusService.findOutletMenus(outletUuid, req);
   }
 }

@@ -15,7 +15,6 @@ export class OutletsController {
   @Get()
   @UsePipes(new ValidationPipe({ transform: true }))
   async findAll(@Query() req: PaginationReqDto) {
-    const outlets = await this.outletsService.findAll(req);
-    return this.outletsService.parseFindAllResponse(req, outlets);
+    return await this.outletsService.findAll(req);
   }
 }

@@ -20,10 +20,15 @@ import {
   PaginationReqDto,
   PaginationReqDtoV2,
 } from 'src/shared/dto/pagination.dto';
+import { OutletsRepo } from 'src/shared/repository/outlets.repo';
+import { AddToCartDto } from './dto/carts.dto';
 
 @Injectable()
 export class CartsService {
-  constructor(@InjectKysely() private readonly db: Kysely<DB>) {}
+  constructor(
+    @InjectKysely() private readonly db: Kysely<DB>,
+    private readonly outletsRepo: OutletsRepo,
+  ) { }
 
   private async upsertCart(trx: Kysely<DB>, cartReq: Partial<CartModel>) {
     let query = trx.insertInto('carts');
@@ -87,6 +92,13 @@ export class CartsService {
       // Upsert cart item
       return await this.upsertCartItem(trx, cart.id, cartItemReq);
     });
+  }
+
+  async addCartItemV2(reqBody: AddToCartDto, userId: number) {
+    const outlet = await this.outletsRepo.findOne(this.db, reqBody.outletUuid);
+    if (!outlet) {
+      throw new NotFoundException('outlet not found');
+    }
   }
 
   async getUserCartsWithItems(

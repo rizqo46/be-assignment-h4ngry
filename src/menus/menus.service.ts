@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/shared/models/d.db';
 import { Kysely } from 'kysely';
@@ -9,12 +9,21 @@ import {
   OutletMenuModel,
 } from 'src/shared/models/menus.model';
 import { OutletMenuDto, OutletMenuRespDto } from './dto/menus.dto';
+import { OutletsRepo } from 'src/shared/repository/outlets.repo';
 
 @Injectable()
 export class MenusService {
-  constructor(@InjectKysely() private readonly db: Kysely<DB>) {}
+  constructor(
+    @InjectKysely() private readonly db: Kysely<DB>,
+    private readonly outletsRepo: OutletsRepo,
+  ) { }
 
-  async findOutletMenus(outletId: number, req: PaginationReqDto) {
+  async findOutletMenus(outletUuid: string, req: PaginationReqDto) {
+    const outlet = await this.outletsRepo.findOne(this.db, outletUuid);
+    if (!outlet) {
+      throw new NotFoundException("outlet isn't found");
+    }
+
     req.pageSize = req.pageSize || 5;
     const pageSize = req.pageSize;
     const cursor = req.cursor;
@@ -23,7 +32,7 @@ export class MenusService {
     let query = this.db
       .selectFrom('outlets_menus')
       .innerJoin('menus', 'menus.id', 'outlets_menus.menu_id')
-      .where('outlets_menus.outlet_id', '=', outletId)
+      .where('outlets_menus.outlet_id', '=', outlet.id)
       .select([
         'outlets_menus.is_available',
         'menus.image',
@@ -43,7 +52,9 @@ export class MenusService {
       query = query.where('menus.src_doc', '@@', search + ':*');
     }
 
-    return await query.execute();
+    let outletMenus = await query.execute()
+
+    return await this.parseFindAllResponse(req, outletMenus);
   }
 
   async parseFindAllResponse(

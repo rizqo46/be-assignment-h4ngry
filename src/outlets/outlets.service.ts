@@ -5,31 +5,18 @@ import { DB } from 'src/shared/models/d.db';
 import { Kysely } from 'kysely';
 import { OutletDto, OutletRespDto } from './dto/outlets.dto';
 import { OutletModel } from 'src/shared/models/outlets.model';
+import { OutletsRepo } from 'src/shared/repository/outlets.repo';
 
 @Injectable()
 export class OutletsService {
-  constructor(@InjectKysely() private readonly db: Kysely<DB>) {}
+  constructor(
+    @InjectKysely() private readonly db: Kysely<DB>,
+    private readonly outletsRepo: OutletsRepo,
+  ) { }
 
   async findAll(req: PaginationReqDto) {
-    req.pageSize = req.pageSize || 5;
-    const pageSize = req.pageSize;
-    const cursor = req.cursor;
-    const search = req.search;
-
-    let query = this.db
-      .selectFrom('outlets')
-      .limit(pageSize)
-      .select(['address', 'uuid', 'id', 'name', 'latitude', 'longitude']);
-
-    if (cursor) {
-      query = query.where('id', '>=', cursor).offset(1);
-    }
-
-    if (search) {
-      query = query.where('src_doc', '@@', search + ':*');
-    }
-
-    return await query.execute();
+    let outlets = await this.outletsRepo.findMany(this.db, req)
+    return await this.parseFindAllResponse(req, outlets)
   }
 
   async parseFindAllResponse(
@@ -49,11 +36,7 @@ export class OutletsService {
     return new OutletRespDto(outletsDto, nextCursor, req.pageSize);
   }
 
-  async findOne(uuid: string): Promise<Partial<OutletModel>> {
-    return await this.db
-      .selectFrom('outlets')
-      .where('uuid', '=', uuid)
-      .select('id')
-      .executeTakeFirst();
+  async findOne(uuid: string) {
+    return await this.outletsRepo.findOne(this.db, uuid)
   }
 }
