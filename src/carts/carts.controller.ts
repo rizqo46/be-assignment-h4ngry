@@ -24,11 +24,14 @@ import { OutletsService } from 'src/outlets/outlets.service';
 import { MenusService } from 'src/menus/menus.service';
 import { AddToCartDto, UpdateCartDto } from './dto/carts.dto';
 import { SuccessRespDto } from 'src/shared/dto/basic.dto';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { PaginationReqDto, PaginationReqDtoV2 } from 'src/shared/dto/pagination.dto';
 
+const cartsControllerName = 'carts'
+
 @ApiBearerAuth()
-@Controller('carts')
+@ApiTags(cartsControllerName)
+@Controller(cartsControllerName)
 export class CartsController {
   constructor(
     private readonly cartsService: CartsService,

@@ -9,8 +9,13 @@ import {
 import { LoginDto } from './dto/login.dto';
 import { UsersService } from 'src/users/users.service';
 import { AuthService } from './auth.service';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('auth')
+
+const authControllerName = 'auth'
+
+@ApiTags(authControllerName)
+@Controller(authControllerName)
 export class AuthController {
   constructor(
     private readonly usersService: UsersService,

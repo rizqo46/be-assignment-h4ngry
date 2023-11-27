@@ -11,10 +11,13 @@ import { OrdersService } from './orders.service';
 import { JWTGuard } from 'src/auth/auth.guard';
 import { Request as RequestExpress } from 'express';
 import { OrderReqDto } from './dto/orders.dto';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+
+const ordersControllerName = 'orders'
 
 @ApiBearerAuth()
-@Controller('orders')
+@ApiTags(ordersControllerName)
+@Controller(ordersControllerName)
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 

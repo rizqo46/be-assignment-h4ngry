@@ -3,8 +3,12 @@ import { OutletsService } from './outlets.service';
 import { Get, Query } from '@nestjs/common';
 import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { PaginationReqDto } from 'src/shared/dto/pagination.dto';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('outlets')
+const outletsControllerName = "outlets"
+
+@ApiTags(outletsControllerName)
+@Controller(outletsControllerName)
 export class OutletsController {
   constructor(private readonly outletsService: OutletsService) {}
 
