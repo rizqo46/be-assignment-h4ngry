@@ -39,3 +39,7 @@ OpenAPI Swagger Docs is available after app startup on [http://localhost:3000/ap
 
 ## ERD
 ![alt](db/erd.png)
+
+### Extended Functionalities:
+- The user must log in to add menus to the cart and make an order
+    - Use simple JWT for auth
