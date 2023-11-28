@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PaginationReqDto } from 'src/shared/dto/pagination.dto';
 import { DB } from 'src/shared/models/d.db';
-import { Kysely } from 'kysely';
+import { Kysely, sql } from 'kysely';
+import { OutletNearby } from 'src/outlets/dto/outlets.dto';
 
 @Injectable()
 export class OutletsRepo {
@@ -32,6 +33,16 @@ export class OutletsRepo {
       .selectFrom('outlets')
       .where('uuid', '=', uuid)
       .select('id')
+      .executeTakeFirst();
+  }
+
+  async findNearby(db: Kysely<DB>, userLoc: OutletNearby) {
+    const distance = sql<string>`loc_point <-> point(${userLoc.latitude}, ${userLoc.longitude})`;
+    return await db
+      .selectFrom('outlets')
+      .select(['address', 'uuid', 'name', 'latitude', 'longitude'])
+      .limit(1)
+      .orderBy(distance)
       .executeTakeFirst();
   }
 }

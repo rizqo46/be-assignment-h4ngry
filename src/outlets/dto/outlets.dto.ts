@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import { IsNumber, Max, Min } from 'class-validator';
 import { PaginationRespDto } from 'src/shared/dto/pagination.dto';
 import { OutletModel } from 'src/shared/models/outlets.model';
 
@@ -31,4 +32,18 @@ export class OutletDto {
 export class OutletRespDto extends PaginationRespDto<OutletDto> {
   @Type(() => OutletDto)
   data: OutletDto[];
+}
+
+export class OutletNearby {
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  @ApiProperty({ example: -7.007683397188739 })
+  latitude: number;
+
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  @ApiProperty({ example: 110.47388333909132 })
+  longitude: number;
 }

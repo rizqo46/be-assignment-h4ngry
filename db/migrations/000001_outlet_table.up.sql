@@ -12,13 +12,14 @@ AND longitude <= 180),
     created_at timestamp NOT NULL DEFAULT now(),
     src_doc tsvector NOT NULL GENERATED ALWAYS AS (to_tsvector('simple'::regconfig,
 (name || ' '::TEXT) || address)) STORED,
+    loc_point point NOT NULL GENERATED ALWAYS AS (point(latitude::text || ',' || longitude::text)) STORED,
     CONSTRAINT outlets_pkey PRIMARY KEY (id),
     CONSTRAINT outlets_uuid_key UNIQUE (uuid)
 );
 
-CREATE INDEX outlet_src_doc_idx ON
-outlets
-  USING GIN(src_doc);
+CREATE INDEX outlet_src_doc_idx ON outlets USING GIN(src_doc);
+
+CREATE INDEX outlet_loc_point ON outlets USING GIST(loc_point);
 
 INSERT
   INTO

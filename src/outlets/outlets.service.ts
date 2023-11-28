@@ -6,7 +6,7 @@ import {
 import { InjectKysely } from 'nestjs-kysely';
 import { DB } from 'src/shared/models/d.db';
 import { Kysely } from 'kysely';
-import { OutletDto, OutletRespDto } from './dto/outlets.dto';
+import { OutletDto, OutletNearby, OutletRespDto } from './dto/outlets.dto';
 import { OutletModel } from 'src/shared/models/outlets.model';
 import { OutletsRepo } from 'src/shared/repository/outlets.repo';
 
@@ -42,5 +42,14 @@ export class OutletsService {
     }
 
     return outlet;
+  }
+
+  async findNearby(userLoc: OutletNearby) {
+    const outlet = await this.outletsRepo.findNearby(this.db, userLoc);
+    if (!outlet) {
+      throw new NotFoundException('outlet not found');
+    }
+
+    return new OutletDto(outlet);
   }
 }

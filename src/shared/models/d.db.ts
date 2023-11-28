@@ -12,6 +12,11 @@ export type Int8 = ColumnType<
 
 export type OrderStatus = 'finished' | 'in_progress';
 
+export type LocationPoint = {
+  latitude: number;
+  longitude: number;
+};
+
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export interface CartItems {
@@ -69,6 +74,7 @@ export interface Outlets {
   created_at: Generated<Timestamp>;
   id: Generated<number>;
   latitude: number;
+  loc_point: Generated<LocationPoint>;
   longitude: number;
   name: string;
   src_doc: Generated<string>;

@@ -18,6 +18,7 @@ import { OrdersRepo } from './repository/orders.repo';
           connectionString: process.env.DATABASE_URL,
         }),
       }),
+      log: ['query'],
     }),
   ],
   providers: [OutletsRepo, MenusRepo, UsersRepo, CartsRepo, OrdersRepo],
