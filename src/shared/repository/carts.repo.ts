@@ -95,12 +95,15 @@ export class CartsRepo {
     let query = db
       .selectFrom('cart_items')
       .leftJoin('menus', 'menus.id', 'cart_items.menu_id')
-      .leftJoin('outlets_menus', (join) =>
-        // I notice bug on join with multiple condition :(
-        join
+      .leftJoin('outlets_menus', (join) => {
+        // It seems, I noticed a bug on join with multiple conditions when using Kysely 
+        // the query result doesnt apply to object
+        // in this case produce outlets_menus.is_available not marshall into object
+        // make response.is_available always show null
+        return join
+          .onRef('cart_items.menu_id', '=', 'outlets_menus.menu_id')
           .on('outlets_menus.outlet_id', '=', cart.outlet_id)
-          .onRef('cart_items.menu_id', '=', 'outlets_menus.menu_id'),
-      )
+      })
       .select([
         'cart_items.uuid',
         'cart_items.quantity',
@@ -111,7 +114,7 @@ export class CartsRepo {
         'menus.image',
       ]);
 
-    query = query.where('cart_items.cart_id', '=', cart.id);
+    query = query.where('cart_items.cart_id', '=', cart.id)
 
     query = query.orderBy('cart_items.updated_at desc');
 
