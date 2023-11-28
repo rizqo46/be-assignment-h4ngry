@@ -1,6 +1,6 @@
 # H4ngry Back-end Case Study
 
-Stack that I used in this project: Node.js (v20.10.0), Typescript (v5.3.2), Nestjs, Postgres(v14.9), Kyseley, Yarn (v1.22.2)
+Stack that I used in this project: Node.js (v20.10.0), Typescript (v5.3.2), Nest.js, nestjs/swagger, Postgres(v14.9), Kyseley, Yarn (v1.22.2)
 
 ## How to run
 
@@ -23,7 +23,11 @@ Stack that I used in this project: Node.js (v20.10.0), Typescript (v5.3.2), Nest
     cat .env.example > .env
     ```
     The important part is `DATABASE_URL`
-3. Run the app
+3. Install nestjs/swagger
+    ```
+    yarn add @nestjs/swagger
+    ```
+4. Run the app
     ```
     yarn start
     ```
