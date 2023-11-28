@@ -8,9 +8,6 @@ export class PaginationReqDto {
   @Type(() => Number)
   pageSize?: number;
 
-  @Type(() => Number)
-  page?: number;
-
   search?: string | null;
 }
 
