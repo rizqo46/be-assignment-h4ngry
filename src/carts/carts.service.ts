@@ -132,7 +132,7 @@ export class CartsService {
       await this.cartsRepo.updateCartItemQuantity(
         trx,
         itemUuid,
-        cartItem.quantity,
+        reqBody.quantity,
       );
       return await this.cartsRepo.updateCartMarkAsUpdated(
         trx,
