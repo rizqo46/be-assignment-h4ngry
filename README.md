@@ -1,15 +1,12 @@
 # H4ngry Back-end Case Study
 
-| Stack                |
-| -------------------- |
-| Node.js (Typescript) |
-| PostgreSQL 14.9      |
+Stack that I used in this project: Node.js (v20.10.0), Typescript (v5.3.2), Nestjs, Postgres(v14.9), Kyseley, Yarn (v1.22.2)
 
 ## How to run
 
 1. Setup database
 
-    I use [migrate](https://github.com/golang-migrate/migrate) to handle migration and seed some data. To migrate run:
+    I use [migrate](https://github.com/golang-migrate/migrate) to handle migration and seed some data. Download and [install](https://github.com/golang-migrate/migrate/releases) it first. To migrate run:
 
     ```
     migrate -path db/migrations -database ${DB_URL} up
@@ -30,9 +27,11 @@
     ```
     yarn start
     ```
+    Tha app will run on [http://localhost:3000](http://localhost:3000) or [http://localhost:PORT](http://localhost:PORT) if you specify PORT on env.
+
 ## API Docs
 
-OpenAPI Swagger Docs is available after app startup on `http://localhost:PORT/api` or you can import from file [api-docs.json](docs/api-docs.json).
+OpenAPI Swagger Docs is available after app startup on [http://localhost:3000/api](http://localhost:3000/api) or you can import from file [api-docs.json](docs/api-docs.json) to Postman, Insomnia or etc.
 
 ## ERD
 ![alt](db/erd.png)
