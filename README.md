@@ -23,9 +23,9 @@ Stack that I used in this project: Node.js (v20.10.0), Typescript (v5.3.2), Nest
     cat .env.example > .env
     ```
     The important part is `DATABASE_URL`
-3. Install nestjs/swagger
+3. Install dependency
     ```
-    yarn add @nestjs/swagger
+    yarn install
     ```
 4. Run the app
     ```
