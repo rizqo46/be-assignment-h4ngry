@@ -35,15 +35,15 @@ export class OutletRespDto extends PaginationRespDto<OutletDto> {
 }
 
 export class OutletNearby {
-  @IsNumber()
-  @Min(-90)
   @Max(90)
+  @Min(-90)
+  @Type(() => Number)
   @ApiProperty({ example: -7.007683397188739 })
   latitude: number;
 
-  @IsNumber()
-  @Min(-180)
   @Max(180)
+  @Min(-180)
+  @Type(() => Number)
   @ApiProperty({ example: 110.47388333909132 })
   longitude: number;
 }

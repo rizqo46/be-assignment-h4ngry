@@ -20,7 +20,7 @@ export class OutletsController {
   }
 
   @Get('nearby')
-  // @UsePipes(new ValidationPipe({ transform: true }))
+  @UsePipes(new ValidationPipe({ transform: true }))
   async findNearby(@Query() reqBody: OutletNearby) {
     return await this.outletsService.findNearby(reqBody);
   }
