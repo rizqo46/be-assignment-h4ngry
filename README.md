@@ -29,7 +29,14 @@ Stack that I used in this project: Node.js (v20.10.0), Typescript (v5.3.2), Nest
     ```
 4. Run the app
     ```
-    yarn start
+    # development
+    $ yarn run start
+    
+    # watch mode
+    $ yarn run start:dev
+    
+    # production mode
+    $ yarn run start:prod
     ```
     Tha app will run on [http://localhost:3000](http://localhost:3000) or [http://localhost:PORT](http://localhost:PORT) if you specify PORT on env.
 
